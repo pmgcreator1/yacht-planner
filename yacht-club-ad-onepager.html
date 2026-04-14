@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&family=Cormorant+SC:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
   <style>
     /* ─────────────────────────────────────────────
@@ -223,22 +224,11 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 10px;
+      padding: 8px;
     }
-    /* QR code placeholder — replaced with real QR image later */
-    .qr-placeholder {
-      width: 100%;
-      height: 100%;
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      grid-template-rows: repeat(7, 1fr);
-      gap: 1.5px;
-    }
-    .qr-placeholder .qc {
-      background: var(--navy);
-    }
-    .qr-placeholder .qw {
-      background: var(--cream);
+    #qrcode canvas, #qrcode img {
+      width: 104px !important;
+      height: 104px !important;
     }
     .qr-label {
       font-family: var(--font-sc);
@@ -340,27 +330,7 @@
       <!-- QR code -->
       <div class="qr-block">
         <div class="qr-frame">
-          <!--
-            PLACEHOLDER: Replace this entire <div class="qr-placeholder">
-            with an <img src="qr-code.png"> once the URL is live.
-            Generate the QR at e.g. qr-code-generator.com pointing to your domain.
-          -->
-          <div class="qr-placeholder">
-            <!-- Row 1: finder pattern top-left + separator + finder pattern top-right -->
-            <div class="qc"></div><div class="qc"></div><div class="qc"></div><div class="qc"></div><div class="qc"></div><div class="qw"></div><div class="qc"></div>
-            <!-- Row 2 -->
-            <div class="qc"></div><div class="qw"></div><div class="qw"></div><div class="qw"></div><div class="qc"></div><div class="qw"></div><div class="qc"></div>
-            <!-- Row 3 -->
-            <div class="qc"></div><div class="qw"></div><div class="qc"></div><div class="qw"></div><div class="qc"></div><div class="qw"></div><div class="qw"></div>
-            <!-- Row 4 -->
-            <div class="qc"></div><div class="qw"></div><div class="qw"></div><div class="qw"></div><div class="qc"></div><div class="qc"></div><div class="qw"></div>
-            <!-- Row 5 -->
-            <div class="qc"></div><div class="qc"></div><div class="qc"></div><div class="qc"></div><div class="qc"></div><div class="qw"></div><div class="qc"></div>
-            <!-- Row 6 -->
-            <div class="qw"></div><div class="qc"></div><div class="qw"></div><div class="qc"></div><div class="qw"></div><div class="qc"></div><div class="qw"></div>
-            <!-- Row 7 -->
-            <div class="qc"></div><div class="qw"></div><div class="qc"></div><div class="qw"></div><div class="qc"></div><div class="qw"></div><div class="qc"></div>
-          </div>
+          <div id="qrcode"></div>
         </div>
         <span class="qr-label">Scan for details</span>
       </div>
@@ -383,5 +353,15 @@
 
 </div>
 
+<script>
+  new QRCode(document.getElementById("qrcode"), {
+    text: "https://private-yacht-club-site.vercel.app/ice-invest-malta-catalog.html",
+    width: 104,
+    height: 104,
+    colorDark: "#0C1C38",
+    colorLight: "#F9F6F0",
+    correctLevel: QRCode.CorrectLevel.H
+  });
+</script>
 </body>
 </html>
