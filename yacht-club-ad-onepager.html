@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Private Yacht Club — Advertisement</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&family=Cormorant+SC:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ─────────────────────────────────────────────
+       DESIGN TOKENS — CMYK-safe, no rgba, no gradients
+    ───────────────────────────────────────────── */
+    :root {
+      --navy:          #0C1C38;
+      --navy-mid:      #1A3260;
+      --cream:         #F9F6F0;
+      --cream-soft:    #F2EDE3;
+      --cream-border:  #DDD4BE;
+      --cream-rule:    #C8BBAA;
+      --bronze:        #B8932A;
+      --bronze-dark:   #8C6E1E;
+      --text:          #1C1C1C;
+      --text-mid:      #484848;
+      --text-light:    #787060;
+
+      --font-display:  'Playfair Display', Georgia, 'Times New Roman', serif;
+      --font-body:     'Cormorant Garamond', Garamond, Georgia, serif;
+      --font-sc:       'Cormorant SC', 'Cormorant Garamond', Georgia, serif;
+
+      --page-w:   794px;
+      --page-h:  1123px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+
+    body {
+      background: #E8E4DC;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+      min-height: 100vh;
+    }
+
+    /* ─────────────────────────────────────────────
+       PAGE SHELL
+    ───────────────────────────────────────────── */
+    .page {
+      width:  var(--page-w);
+      height: var(--page-h);
+      background: var(--navy);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* ─────────────────────────────────────────────
+       FULL-BLEED HERO IMAGE (top ~65% of page)
+    ───────────────────────────────────────────── */
+    .hero {
+      flex: 0 0 640px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 40%;
+      display: block;
+    }
+    /* Dark overlay at bottom of image to blend into navy */
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 180px;
+      background: var(--navy);
+      /* CMYK-safe: solid color, no gradient */
+      -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 100%);
+      mask-image: linear-gradient(to bottom, transparent 0%, black 100%);
+    }
+
+    /* ─────────────────────────────────────────────
+       HEADER (sits over the image, top-left)
+    ───────────────────────────────────────────── */
+    .page-header {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 10;
+      padding: 22px 52px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .hdr-brand {
+      font-family: var(--font-sc);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.52em;
+      color: var(--cream);
+      text-transform: uppercase;
+    }
+    .hdr-right {
+      font-family: var(--font-sc);
+      font-size: 7.5px;
+      letter-spacing: 0.28em;
+      color: rgba(249,246,240,0.55);
+      text-transform: uppercase;
+    }
+
+    /* Bronze rule under header */
+    .header-rule {
+      position: absolute;
+      top: 52px;
+      left: 52px;
+      right: 52px;
+      height: 1px;
+      background: var(--bronze);
+      opacity: 0.45;
+      z-index: 10;
+    }
+
+    /* ─────────────────────────────────────────────
+       BODY — below the image
+    ───────────────────────────────────────────── */
+    .ad-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 0 52px 0;
+      background: var(--navy);
+      position: relative;
+      z-index: 5;
+    }
+
+    /* ─── HEADLINE ─── */
+    .ad-eyebrow {
+      font-family: var(--font-sc);
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: 0.52em;
+      color: var(--bronze);
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 12px;
+      margin-top: 28px;
+    }
+    .ad-headline {
+      font-family: var(--font-display);
+      font-style: italic;
+      font-weight: 700;
+      font-size: 68px;
+      line-height: 0.97;
+      color: var(--cream);
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+    .ad-subline {
+      font-family: var(--font-sc);
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.38em;
+      color: var(--bronze);
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 28px;
+    }
+
+    /* Thin bronze rule */
+    .rule {
+      height: 1px;
+      background: var(--bronze);
+      opacity: 0.35;
+      margin-bottom: 26px;
+    }
+
+    /* ─── TEASER COPY + QR LAYOUT ─── */
+    .bottom-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 40px;
+    }
+    .teaser {
+      flex: 1;
+    }
+    .teaser-line {
+      font-family: var(--font-body);
+      font-size: 15px;
+      font-style: italic;
+      color: var(--cream-soft);
+      line-height: 1.75;
+      display: block;
+      margin-bottom: 4px;
+    }
+    .teaser-line strong {
+      font-style: normal;
+      font-weight: 600;
+      color: var(--cream);
+    }
+
+    /* ─── QR CODE BOX ─── */
+    .qr-block {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    .qr-frame {
+      width: 120px;
+      height: 120px;
+      background: var(--cream);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+    }
+    /* QR code placeholder — replaced with real QR image later */
+    .qr-placeholder {
+      width: 100%;
+      height: 100%;
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      grid-template-rows: repeat(7, 1fr);
+      gap: 1.5px;
+    }
+    .qr-placeholder .qc {
+      background: var(--navy);
+    }
+    .qr-placeholder .qw {
+      background: var(--cream);
+    }
+    .qr-label {
+      font-family: var(--font-sc);
+      font-size: 7.5px;
+      letter-spacing: 0.28em;
+      color: #A89E88;
+      text-transform: uppercase;
+      text-align: center;
+    }
+
+    /* ─── FOOTER ─── */
+    .ad-footer {
+      margin-top: auto;
+      padding-bottom: 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+    .footer-detail {
+      font-family: var(--font-sc);
+      font-size: 7px;
+      letter-spacing: 0.28em;
+      color: #6A6258;
+      text-transform: uppercase;
+      line-height: 1.8;
+    }
+    .footer-pub {
+      font-family: var(--font-sc);
+      font-size: 7px;
+      letter-spacing: 0.22em;
+      color: #6A6258;
+      text-align: right;
+      line-height: 1.8;
+    }
+
+    /* ─────────────────────────────────────────────
+       PRINT STYLESHEET
+    ───────────────────────────────────────────── */
+    @media print {
+      body {
+        margin: 0;
+        padding: 0;
+        background: none;
+        display: block;
+      }
+      .page {
+        width: 210mm;
+        height: 297mm;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        color-adjust: exact;
+      }
+      * {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+    @page {
+      size: A4 portrait;
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- Header (absolute, over the image) -->
+  <header class="page-header">
+    <span class="hdr-brand">Private Yacht Club</span>
+    <span class="hdr-right">Boat International &nbsp;·&nbsp; Advertisement</span>
+  </header>
+  <div class="header-rule"></div>
+
+  <!-- Full-bleed hero image -->
+  <div class="hero">
+    <img src="Picture Yacht Website.png" alt="Explorer Yacht — Private Yacht Club">
+  </div>
+
+  <!-- Ad body -->
+  <div class="ad-body">
+
+    <span class="ad-eyebrow">Explorer Yacht &nbsp;·&nbsp; Below 500 GRT &nbsp;·&nbsp; Montenegro</span>
+
+    <h1 class="ad-headline">Private<br>Yacht Club.</h1>
+    <span class="ad-subline">Three Members Only</span>
+
+    <div class="rule"></div>
+
+    <div class="bottom-row">
+
+      <!-- Teaser copy -->
+      <div class="teaser">
+        <span class="teaser-line"><strong>12 weeks per year.</strong> Yours to use however you wish.</span>
+        <span class="teaser-line">Sail it privately. Charter it. Swap with a fellow member.</span>
+        <span class="teaser-line"><strong>No restrictions.</strong> Full transparency. Open book.</span>
+      </div>
+
+      <!-- QR code -->
+      <div class="qr-block">
+        <div class="qr-frame">
+          <!--
+            PLACEHOLDER: Replace this entire <div class="qr-placeholder">
+            with an <img src="qr-code.png"> once the URL is live.
+            Generate the QR at e.g. qr-code-generator.com pointing to your domain.
+          -->
+          <div class="qr-placeholder">
+            <!-- Row 1: finder pattern top-left + separator + finder pattern top-right -->
+            <div class="qc"></div><div class="qc"></div><div class="qc"></div><div class="qc"></div><div class="qc"></div><div class="qw"></div><div class="qc"></div>
+            <!-- Row 2 -->
+            <div class="qc"></div><div class="qw"></div><div class="qw"></div><div class="qw"></div><div class="qc"></div><div class="qw"></div><div class="qc"></div>
+            <!-- Row 3 -->
+            <div class="qc"></div><div class="qw"></div><div class="qc"></div><div class="qw"></div><div class="qc"></div><div class="qw"></div><div class="qw"></div>
+            <!-- Row 4 -->
+            <div class="qc"></div><div class="qw"></div><div class="qw"></div><div class="qw"></div><div class="qc"></div><div class="qc"></div><div class="qw"></div>
+            <!-- Row 5 -->
+            <div class="qc"></div><div class="qc"></div><div class="qc"></div><div class="qc"></div><div class="qc"></div><div class="qw"></div><div class="qc"></div>
+            <!-- Row 6 -->
+            <div class="qw"></div><div class="qc"></div><div class="qw"></div><div class="qc"></div><div class="qw"></div><div class="qc"></div><div class="qw"></div>
+            <!-- Row 7 -->
+            <div class="qc"></div><div class="qw"></div><div class="qc"></div><div class="qw"></div><div class="qc"></div><div class="qw"></div><div class="qc"></div>
+          </div>
+        </div>
+        <span class="qr-label">Scan for details</span>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="ad-footer">
+      <div class="footer-detail">
+        Mediterranean &nbsp;·&nbsp; Caribbean &nbsp;·&nbsp; Pacific<br>
+        Three members &nbsp;·&nbsp; One extraordinary yacht
+      </div>
+      <div class="footer-pub">
+        Boat International &nbsp;·&nbsp; Advertisement<br>
+        Private Yacht Club &nbsp;·&nbsp; 2026
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+</body>
+</html>

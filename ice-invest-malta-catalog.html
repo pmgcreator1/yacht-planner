@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Private Yacht Club — Boat International</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&family=Cormorant+SC:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ─────────────────────────────────────────────
+       DESIGN TOKENS
+       CMYK-safe palette — no rgba transparency,
+       no gradients on fills, no shadows, no blur.
+    ───────────────────────────────────────────── */
+    :root {
+      /* C=95 M=73 Y=28 K=18 — deep navy, rich in print */
+      --navy:          #0C1C38;
+      --navy-mid:      #1A3260;
+
+      /* Warm white — near-zero ink, no bleed risk */
+      --cream:         #F9F6F0;
+      --cream-soft:    #F2EDE3;
+      --cream-border:  #DDD4BE;
+      --cream-rule:    #C8BBAA;
+
+      /* C=15 M=35 Y=90 K=5 — warm bronze/gold, survives CMYK */
+      --bronze:        #B8932A;
+      --bronze-dark:   #8C6E1E;
+
+      /* Body text — C=0 M=0 Y=0 K=88 (not 100% K, avoids rich black issues) */
+      --text:          #1C1C1C;
+      --text-mid:      #484848;
+      --text-light:    #787060;
+
+      --font-display:  'Playfair Display', Georgia, 'Times New Roman', serif;
+      --font-body:     'Cormorant Garamond', Garamond, Georgia, serif;
+      --font-sc:       'Cormorant SC', 'Cormorant Garamond', Georgia, serif;
+
+      --page-w:   794px;
+      --page-h:  1123px;
+      --px:        52px;   /* horizontal page padding */
+    }
+
+    /* ─────────────────────────────────────────────
+       RESET
+    ───────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+
+    body {
+      background: #E8E4DC;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+      gap: 36px;
+      min-height: 100vh;
+    }
+
+    /* ─────────────────────────────────────────────
+       PAGE SHELL
+    ───────────────────────────────────────────── */
+    .page {
+      width:  var(--page-w);
+      height: var(--page-h);
+      background: var(--cream);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* ─────────────────────────────────────────────
+       SHARED: HEADER BAR (navy strip, top of each page)
+    ───────────────────────────────────────────── */
+    .page-header {
+      flex-shrink: 0;
+      background: var(--navy);
+      padding: 0 var(--px);
+      height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .hdr-brand {
+      font-family: var(--font-sc);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.52em;
+      color: var(--cream);
+      text-transform: uppercase;
+    }
+    .hdr-right {
+      font-family: var(--font-sc);
+      font-size: 7.5px;
+      letter-spacing: 0.28em;
+      color: #A89E88;
+      text-transform: uppercase;
+    }
+
+    /* ─────────────────────────────────────────────
+       SHARED: FOOTER BAR (navy strip, bottom of each page)
+    ───────────────────────────────────────────── */
+    .page-footer {
+      flex-shrink: 0;
+      margin-top: auto;
+      background: var(--navy);
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .footer-text {
+      font-family: var(--font-sc);
+      font-size: 7px;
+      letter-spacing: 0.35em;
+      color: #8A8070;
+      text-transform: uppercase;
+    }
+
+    /* ─────────────────────────────────────────────
+       SHARED: BRONZE RULE
+    ───────────────────────────────────────────── */
+    .rule-bronze {
+      flex-shrink: 0;
+      height: 1px;
+      background: var(--bronze);
+      margin: 0 var(--px);
+      opacity: 0.55;
+    }
+    .rule-cream {
+      flex-shrink: 0;
+      height: 1px;
+      background: var(--cream-rule);
+      margin: 0 var(--px);
+    }
+    .rule-full {
+      margin-left: 0;
+      margin-right: 0;
+    }
+
+    /* ─────────────────────────────────────────────
+       SHARED: SECTION EYEBROW LABEL
+    ───────────────────────────────────────────── */
+    .eyebrow {
+      font-family: var(--font-sc);
+      font-size: 8px;
+      font-weight: 500;
+      letter-spacing: 0.42em;
+      color: var(--bronze);
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 10px;
+    }
+
+    /* ═════════════════════════════════════════════
+       PAGE 1
+    ═════════════════════════════════════════════ */
+
+    /* ─── HEADLINE ZONE ─── */
+    .headline-zone {
+      flex-shrink: 0;
+      padding: 26px var(--px) 22px;
+      background: var(--cream);
+    }
+    .main-headline {
+      font-family: var(--font-display);
+      font-style: italic;
+      font-weight: 700;
+      font-size: 52px;
+      line-height: 1.08;
+      color: var(--navy);
+      letter-spacing: -0.015em;
+      margin-bottom: 13px;
+    }
+    /* Bronze dot between the two sentences */
+    .main-headline .sep {
+      color: var(--bronze);
+      font-style: normal;
+    }
+    .sub-headline {
+      font-family: var(--font-body);
+      font-style: italic;
+      font-size: 15.5px;
+      line-height: 1.58;
+      color: var(--text-mid);
+      max-width: 620px;
+    }
+
+    /* ─── TWO-COLUMN CONTENT ZONE ─── */
+    .content-zone {
+      flex-shrink: 0;
+      display: flex;
+      align-items: stretch;
+      height: 500px;
+      max-height: 500px;
+      overflow: hidden;
+      background: var(--navy);
+    }
+    .col-image {
+      flex: 0 0 54%;
+      height: 500px;
+      max-height: 500px;
+      overflow: hidden;
+      position: relative;
+      border-right: 1px solid var(--cream-border);
+    }
+    .col-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      display: block;
+    }
+    /* Full-width caption bar between content zone and stat bar */
+    .caption-bar {
+      flex-shrink: 0;
+      background: var(--navy);
+      padding: 6px var(--px);
+    }
+    .caption-bar span {
+      font-family: var(--font-sc);
+      font-size: 7px;
+      letter-spacing: 0.28em;
+      color: #A89E88;
+    }
+
+    .col-concept {
+      flex: 1;
+      height: 500px;
+      max-height: 500px;
+      min-height: 0;
+      padding: 20px 24px 16px 22px;
+      border-left: 3px solid var(--bronze);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      background: var(--cream);
+      overflow: hidden;
+    }
+    .concept-para {
+      font-family: var(--font-body);
+      font-size: 12.5px;
+      font-weight: 400;
+      line-height: 1.70;
+      color: var(--text);
+      margin-bottom: 9px;
+    }
+    .concept-para:last-of-type { margin-bottom: 0; }
+    .concept-para strong {
+      font-weight: 600;
+      color: var(--navy);
+    }
+
+    /* ─── STAT BAR ─── */
+    .stat-bar {
+      flex-shrink: 0;
+      background: var(--navy);
+      height: 70px;
+      display: grid;
+      grid-template-columns: 1fr 1px 1fr 1px 1fr;
+      align-items: center;
+    }
+    .stat-divider {
+      width: 1px;
+      height: 36px;
+      background: #2E4470;
+      align-self: center;
+    }
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      padding: 0 8px;
+    }
+    .stat-number {
+      font-family: var(--font-display);
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--bronze);
+      line-height: 1;
+      letter-spacing: -0.01em;
+    }
+    .stat-label {
+      font-family: var(--font-sc);
+      font-size: 7.5px;
+      letter-spacing: 0.28em;
+      color: #A89E88;
+      text-align: center;
+    }
+
+    /* ─── DESTINATIONS ROW ─── */
+    .destinations-row {
+      flex-shrink: 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      border-top: 1px solid var(--cream-border);
+      border-bottom: 1px solid var(--cream-border);
+      background: var(--cream-soft);
+    }
+    .dest-tile {
+      padding: 14px 0 14px var(--px);
+      border-right: 1px solid var(--cream-border);
+      position: relative;
+    }
+    .dest-tile:last-child { border-right: none; }
+    .dest-tile:first-child { padding-left: var(--px); }
+    .dest-tile:not(:first-child) { padding-left: 20px; }
+    .dest-name {
+      font-family: var(--font-display);
+      font-style: italic;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--navy);
+      display: block;
+      margin-bottom: 3px;
+    }
+    .dest-detail {
+      font-family: var(--font-body);
+      font-size: 10.5px;
+      color: var(--text-light);
+      line-height: 1.4;
+    }
+    .dest-season {
+      display: block;
+      margin-top: 4px;
+      font-family: var(--font-sc);
+      font-size: 7.5px;
+      letter-spacing: 0.22em;
+      color: var(--bronze-dark);
+    }
+
+    /* ═════════════════════════════════════════════
+       PAGE 2
+    ═════════════════════════════════════════════ */
+
+    .page2-body {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1px 1fr;
+      gap: 0;
+      padding: 0;
+      min-height: 0;
+    }
+    .col-sep {
+      width: 1px;
+      background: var(--cream-border);
+      margin: 20px 0;
+    }
+    .p2-left {
+      padding: 24px var(--px) 20px 52px;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .p2-right {
+      padding: 24px 52px 20px 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    /* ─── ROADMAP TIMELINE (Page 2 Left) ─── */
+    .roadmap {
+      flex-shrink: 0;
+      margin-bottom: 22px;
+    }
+    .roadmap-track {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0;
+      margin-top: 4px;
+    }
+    /* Connecting horizontal line */
+    .roadmap-track::before {
+      content: '';
+      position: absolute;
+      top: 7px;
+      left: 14%;
+      right: 14%;
+      height: 1px;
+      background: var(--bronze);
+      opacity: 0.45;
+    }
+    .roadmap-node {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+      padding: 0 6px;
+    }
+    .rm-dot {
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: var(--cream);
+      border: 2px solid var(--navy);
+      margin-bottom: 8px;
+      flex-shrink: 0;
+    }
+    .rm-dot.current {
+      background: var(--navy);
+      border-color: var(--bronze);
+    }
+    .rm-year {
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--navy);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .rm-desc {
+      font-family: var(--font-sc);
+      font-size: 7.5px;
+      letter-spacing: 0.16em;
+      color: var(--text-mid);
+      line-height: 1.4;
+    }
+
+    /* ─── FLEET BOX (Page 2 Left) ─── */
+    .fleet-box {
+      flex-shrink: 0;
+      border: 1px solid var(--cream-border);
+      padding: 14px 16px;
+      margin-bottom: 18px;
+      background: var(--cream-soft);
+    }
+    .fleet-intro {
+      font-family: var(--font-body);
+      font-style: italic;
+      font-size: 13px;
+      color: var(--text-mid);
+      margin-bottom: 8px;
+      line-height: 1.5;
+    }
+    .fleet-names {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .fleet-names li {
+      font-family: var(--font-body);
+      font-size: 13px;
+      color: var(--text);
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+    .fleet-names li::before {
+      content: '';
+      width: 5px;
+      height: 1px;
+      background: var(--bronze);
+      flex-shrink: 0;
+      position: relative;
+      top: -3px;
+    }
+
+    /* ─── RULES BOX (Page 2 Left) ─── */
+    .rules-box {
+      flex-shrink: 0;
+      border: 1px solid var(--bronze);
+      padding: 14px 16px 13px;
+      margin-bottom: 0;
+    }
+    .rules-title {
+      font-family: var(--font-sc);
+      font-size: 8.5px;
+      font-weight: 500;
+      letter-spacing: 0.42em;
+      color: var(--bronze-dark);
+      text-align: center;
+      margin-bottom: 10px;
+      padding-bottom: 9px;
+      border-bottom: 1px solid var(--cream-border);
+    }
+    .rules-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .rules-list li {
+      font-family: var(--font-body);
+      font-size: 12.5px;
+      color: var(--text);
+      display: flex;
+      align-items: baseline;
+      gap: 9px;
+      line-height: 1.35;
+    }
+    .rules-list li::before {
+      content: '◆';
+      font-size: 5.5px;
+      color: var(--bronze);
+      flex-shrink: 0;
+      position: relative;
+      top: -1px;
+    }
+
+    /* ─── PARTNER NOTE (Page 2 Left, below rules) ─── */
+    .partner-note {
+      flex-shrink: 0;
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid var(--cream-border);
+    }
+    .partner-note p {
+      font-family: var(--font-body);
+      font-style: italic;
+      font-size: 12px;
+      color: var(--text-mid);
+      line-height: 1.65;
+    }
+    .partner-note strong {
+      font-style: normal;
+      font-weight: 600;
+      color: var(--navy);
+    }
+
+    /* ─── FINANCIAL TABLE (Page 2 Right) ─── */
+    .fin-section {
+      flex-shrink: 0;
+      margin-bottom: 20px;
+    }
+    .fin-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .fin-table tr {
+      border-bottom: 1px solid var(--cream-border);
+    }
+    .fin-table tr:first-child {
+      border-top: 1px solid var(--cream-border);
+    }
+    .fin-table td {
+      padding: 9px 0;
+      vertical-align: middle;
+    }
+    .fin-label {
+      font-family: var(--font-sc);
+      font-size: 8px;
+      letter-spacing: 0.22em;
+      color: var(--text-light);
+      width: 50%;
+    }
+    .fin-value {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 700;
+      font-style: italic;
+      color: var(--navy);
+      text-align: right;
+    }
+    .fin-value.bronze { color: var(--bronze-dark); }
+    .fin-sub {
+      font-family: var(--font-body);
+      font-size: 9px;
+      color: var(--text-light);
+      text-align: right;
+      display: block;
+      line-height: 1.3;
+    }
+    /* Three-year plan summary strip */
+    .year-strip {
+      flex-shrink: 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      border: 1px solid var(--cream-border);
+      margin-bottom: 20px;
+      background: var(--cream-soft);
+    }
+    .year-cell {
+      padding: 10px 12px;
+      border-right: 1px solid var(--cream-border);
+    }
+    .year-cell:last-child { border-right: none; }
+    .year-num {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--navy);
+      line-height: 1;
+      display: block;
+      margin-bottom: 3px;
+    }
+    .year-eyebrow {
+      font-family: var(--font-sc);
+      font-size: 6.5px;
+      letter-spacing: 0.28em;
+      color: var(--bronze-dark);
+      display: block;
+      margin-bottom: 5px;
+    }
+    .year-desc {
+      font-family: var(--font-body);
+      font-size: 11px;
+      color: var(--text-mid);
+      line-height: 1.5;
+    }
+    .year-desc strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    /* ─── SEASON CALENDAR (Page 2 Right) ─── */
+    .calendar-section {
+      flex-shrink: 0;
+    }
+    .cal-grid {
+      display: grid;
+      grid-template-columns: 62px repeat(12, 1fr);
+      gap: 2px;
+    }
+    .cal-month {
+      font-family: var(--font-sc);
+      font-size: 6.5px;
+      letter-spacing: 0.05em;
+      color: var(--text-light);
+      text-align: center;
+      padding-bottom: 3px;
+    }
+    .cal-region {
+      font-family: var(--font-sc);
+      font-size: 7px;
+      letter-spacing: 0.1em;
+      color: var(--text-mid);
+      text-align: right;
+      padding-right: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+    }
+    .cal-cell {
+      height: 14px;
+      background: var(--cream-soft);
+      border: 1px solid var(--cream-border);
+    }
+    /* Solid fills only — no rgba, safe for CMYK print */
+    .cal-cell.active {
+      background: var(--navy);
+      border-color: var(--navy);
+    }
+    .cal-cell.active-alt {
+      background: var(--bronze);
+      border-color: var(--bronze-dark);
+      opacity: 0.75;
+    }
+    .cal-cell.service {
+      background: var(--cream-rule);
+      border: 1px dashed var(--bronze);
+    }
+    .cal-legend {
+      display: flex;
+      gap: 14px;
+      margin-top: 7px;
+      padding-left: 65px;
+      flex-wrap: wrap;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-family: var(--font-sc);
+      font-size: 7px;
+      letter-spacing: 0.14em;
+      color: var(--text-light);
+    }
+    .legend-swatch {
+      width: 14px;
+      height: 8px;
+      border: 1px solid var(--cream-border);
+      flex-shrink: 0;
+    }
+    .legend-swatch.active     { background: var(--navy); border-color: var(--navy); }
+    .legend-swatch.active-alt { background: var(--bronze); border-color: var(--bronze-dark); opacity: 0.75; }
+    .legend-swatch.service    { background: var(--cream-rule); border: 1px dashed var(--bronze); }
+
+    /* ─── OPEX CALLOUT (Page 2 Right, below calendar) ─── */
+    .opex-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 16px;
+      flex-shrink: 0;
+    }
+    .opex-card {
+      border-top: 2px solid var(--navy);
+      padding: 10px 0 0 0;
+    }
+    .opex-value {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 700;
+      font-style: italic;
+      color: var(--navy);
+      display: block;
+      line-height: 1.1;
+      margin-bottom: 2px;
+    }
+    .opex-label {
+      font-family: var(--font-sc);
+      font-size: 7px;
+      letter-spacing: 0.22em;
+      color: var(--text-light);
+    }
+    .opex-sub {
+      font-family: var(--font-body);
+      font-size: 9.5px;
+      color: var(--text-light);
+      margin-top: 2px;
+    }
+
+    /* ─────────────────────────────────────────────
+       PRINT STYLESHEET
+    ───────────────────────────────────────────── */
+    @media print {
+      body {
+        margin: 0;
+        padding: 0;
+        background: none;
+        display: block;
+      }
+      .page {
+        width: 210mm;
+        height: 297mm;
+        page-break-after: always;
+        break-after: page;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        color-adjust: exact;
+      }
+      .page-2 {
+        page-break-after: avoid;
+        break-after: auto;
+      }
+      * {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+    @page {
+      size: A4 portrait;
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE 1 — THE CONCEPT
+════════════════════════════════════════════════════ -->
+<div class="page page-1">
+
+  <!-- Header bar -->
+  <header class="page-header">
+    <span class="hdr-brand">Private Yacht Club</span>
+    <span class="hdr-right">Boat International &nbsp;·&nbsp; Advertisement</span>
+  </header>
+
+  <!-- Headline zone -->
+  <section class="headline-zone">
+    <h1 class="main-headline">
+      Private Yacht Club<span class="sep">.</span><br>
+      Three Members Only.
+    </h1>
+    <p class="sub-headline">
+      An exclusive club of three — each owning one-third of a world-class explorer yacht,
+      sharing nothing but the costs. What you do with your time aboard is entirely your own affair.
+    </p>
+  </section>
+
+  <!-- Bronze rule -->
+  <div class="rule-bronze"></div>
+
+  <!-- Two-column: image + concept text -->
+  <section class="content-zone">
+
+    <!-- Yacht photograph -->
+    <div class="col-image">
+      <img src="Picture Yacht Website.png" alt="Explorer Yacht — below 500 GRT">
+    </div>
+
+    <!-- The Concept editorial -->
+    <div class="col-concept">
+      <span class="eyebrow">The Concept</span>
+
+      <p class="concept-para">
+        Three individuals jointly acquire a single explorer yacht under 500&nbsp;GRT,
+        each holding exactly <strong>one-third of the vessel</strong> — covering one-third
+        of the purchase price and annual operating costs. Every number is open for inspection.
+        Full transparency, <strong>open book</strong> — no soft costs, no hidden markups.
+      </p>
+
+      <p class="concept-para">
+        Each member receives <strong>12 weeks of exclusive use</strong> per year.
+        What you do with those weeks is entirely your decision: enjoy the yacht privately,
+        place it on charter, or swap weeks with a fellow member. No restrictions, no obligations.
+        Your time is yours.
+      </p>
+
+      <p class="concept-para">
+        Charter at <strong>&euro;350,000 per week</strong> — revenues flow directly to
+        the member who owns that week. A single charter week covers a meaningful share
+        of your annual operating costs.
+      </p>
+
+    </div>
+
+  </section>
+
+  <!-- Full-width caption bar -->
+  <div class="caption-bar">
+    <span>Explorer Yacht &nbsp;·&nbsp; Below 500 GRT &nbsp;·&nbsp; Montenegro Base</span>
+  </div>
+
+  <!-- Stat bar -->
+  <div class="stat-bar">
+    <div class="stat-item">
+      <span class="stat-number">3</span>
+      <span class="stat-label">Equal Partners</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <span class="stat-number">12 Weeks</span>
+      <span class="stat-label">Per Member Per Year</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <span class="stat-number">&#8531; of All Costs</span>
+      <span class="stat-label">Investment &nbsp;·&nbsp; OpEx &nbsp;·&nbsp; Full Transparency</span>
+    </div>
+  </div>
+
+  <!-- Destinations row -->
+  <section class="destinations-row">
+    <div class="dest-tile">
+      <span class="dest-name">Mediterranean</span>
+      <span class="dest-detail">Croatia, Montenegro, Greece, Italy</span>
+      <span class="dest-season">High Season: June &ndash; September</span>
+    </div>
+    <div class="dest-tile">
+      <span class="dest-name">Caribbean</span>
+      <span class="dest-detail">BVI, St. Barths, Antigua, Grenadines</span>
+      <span class="dest-season">High Season: December &ndash; March</span>
+    </div>
+    <div class="dest-tile">
+      <span class="dest-name">Pacific</span>
+      <span class="dest-detail">Tahiti, Fiji, New Zealand, Japan</span>
+      <span class="dest-season">Year 2 &nbsp;·&nbsp; 12-Month Deployment</span>
+    </div>
+    <div class="dest-tile">
+      <span class="dest-name">Global</span>
+      <span class="dest-detail">Owner-curated worldwide itinerary</span>
+      <span class="dest-season">Year 3 &nbsp;·&nbsp; Best of the Best</span>
+    </div>
+  </section>
+
+  <!-- Footer bar -->
+  <footer class="page-footer">
+    <span class="footer-text">Boat International &nbsp;·&nbsp; Advertisement &nbsp;·&nbsp; Private Yacht Club &nbsp;·&nbsp; 2026</span>
+  </footer>
+
+</div><!-- /page-1 -->
+
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE 2 — THE DETAILS
+════════════════════════════════════════════════════ -->
+<div class="page page-2">
+
+  <!-- Header bar -->
+  <header class="page-header">
+    <span class="hdr-brand">Private Yacht Club</span>
+    <span class="hdr-right">Investment Details &nbsp;·&nbsp; Confidential Summary</span>
+  </header>
+
+  <!-- Bronze rule under header -->
+  <div class="rule-bronze rule-full" style="margin: 0;"></div>
+
+  <!-- Two-column body -->
+  <div class="page2-body">
+
+    <!-- LEFT COLUMN -->
+    <div class="p2-left">
+
+      <!-- Roadmap -->
+      <div class="roadmap">
+        <span class="eyebrow">Acquisition Roadmap</span>
+        <div class="roadmap-track">
+          <div class="roadmap-node">
+            <div class="rm-dot current"></div>
+            <div class="rm-year">Now</div>
+            <div class="rm-desc">Pre-Owned Entry<br>&euro;30&thinsp;M Acquisition</div>
+          </div>
+          <div class="roadmap-node">
+            <div class="rm-dot"></div>
+            <div class="rm-year">2028&thinsp;/&thinsp;29</div>
+            <div class="rm-desc">New Build<br>Delivery</div>
+          </div>
+          <div class="roadmap-node">
+            <div class="rm-dot"></div>
+            <div class="rm-year">On Delivery</div>
+            <div class="rm-desc">Sell Pre-Owned<br>Asset</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="rule-cream" style="margin: 0 0 18px 0;"></div>
+
+      <!-- Fleet box -->
+      <div class="fleet-box">
+        <span class="eyebrow" style="margin-bottom:6px;">Starting Fleet — Explorer Yachts Below 500 GRT</span>
+        <p class="fleet-intro">
+          The programme begins with established expedition vessels of proven quality and global range.
+          Reference vessels in this class include:
+        </p>
+        <ul class="fleet-names">
+          <li>King Benji</li>
+          <li>Silver Star &nbsp;<span style="font-family:var(--font-sc); font-size:10px; color:var(--text-light);">by Giorgio Armani</span></li>
+          <li>Para Bellum</li>
+          <li><span style="color:var(--text-light); font-style:italic; font-size:12px;">…and comparable expedition vessels</span></li>
+        </ul>
+      </div>
+
+      <!-- Rules box -->
+      <div class="rules-box">
+        <div class="rules-title">Simple Rules</div>
+        <ul class="rules-list">
+          <li>Equal treatment for all members</li>
+          <li>Open books &mdash; no soft costs</li>
+          <li>Cost-plus principle throughout</li>
+          <li>Each member's 12 weeks: use, charter, or swap</li>
+          <li>3-year revolving deployment cycle</li>
+          <li>Base: Montenegro</li>
+        </ul>
+      </div>
+
+      <!-- Partner note -->
+      <div class="partner-note">
+        <p>
+          <strong>New build:</strong> &euro;13&thinsp;M total investment — &euro;4.33&thinsp;M per member.
+          On delivery in 2028&thinsp;/&thinsp;29, the pre-owned vessel is sold.
+          <strong>Lower cost of entry. Transition to purpose-built.</strong>
+        </p>
+      </div>
+
+    </div>
+
+    <!-- Column separator -->
+    <div class="col-sep"></div>
+
+    <!-- RIGHT COLUMN -->
+    <div class="p2-right">
+
+      <!-- Three-year plan strip -->
+      <span class="eyebrow">The Three-Year Revolving Plan</span>
+      <div class="year-strip" style="margin-bottom:18px;">
+        <div class="year-cell">
+          <span class="year-eyebrow">Year One</span>
+          <span class="year-num">01</span>
+          <div class="year-desc">
+            <strong>May &ndash; Sep</strong> Mediterranean<br>
+            <strong>Dec &ndash; Mar</strong> Caribbean
+          </div>
+        </div>
+        <div class="year-cell">
+          <span class="year-eyebrow">Year Two</span>
+          <span class="year-num">02</span>
+          <div class="year-desc">
+            <strong>12 months</strong><br>Pacific Ocean
+          </div>
+        </div>
+        <div class="year-cell">
+          <span class="year-eyebrow">Year Three</span>
+          <span class="year-num">03</span>
+          <div class="year-desc">
+            <strong>Global cruise</strong><br>Best of the best
+          </div>
+        </div>
+      </div>
+
+      <!-- Financial table -->
+      <div class="fin-section">
+        <span class="eyebrow">Financial Overview</span>
+        <table class="fin-table">
+          <tr>
+            <td class="fin-label">Annual operating expenditure</td>
+            <td>
+              <span class="fin-value">&euro;&thinsp;800&thinsp;K</span>
+              <span class="fin-sub">&euro;&thinsp;267&thinsp;K per member per year</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="fin-label">Charter rate per week</td>
+            <td>
+              <span class="fin-value bronze">&euro;&thinsp;350&thinsp;K / week</span>
+              <span class="fin-sub">Revenue goes directly to the member who owns that week</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="fin-label">New build total investment</td>
+            <td>
+              <span class="fin-value">&euro;&thinsp;13&thinsp;M</span>
+              <span class="fin-sub">&euro;&thinsp;4.33&thinsp;M per member &nbsp;&middot;&nbsp; delivery 2028&thinsp;/&thinsp;29</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="fin-label">Delivery &amp; maintenance windows</td>
+            <td>
+              <span class="fin-value" style="font-size:13px;">Oct–Nov &nbsp;&amp;&nbsp; Apr–May</span>
+              <span class="fin-sub">Shared equally across all three partners</span>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- Season calendar -->
+      <div class="calendar-section">
+        <span class="eyebrow">Annual Season Calendar</span>
+        <div class="cal-grid">
+
+          <!-- Month header row -->
+          <div></div>
+          <div class="cal-month">Jan</div><div class="cal-month">Feb</div>
+          <div class="cal-month">Mar</div><div class="cal-month">Apr</div>
+          <div class="cal-month">May</div><div class="cal-month">Jun</div>
+          <div class="cal-month">Jul</div><div class="cal-month">Aug</div>
+          <div class="cal-month">Sep</div><div class="cal-month">Oct</div>
+          <div class="cal-month">Nov</div><div class="cal-month">Dec</div>
+
+          <!-- EU Mediterranean: Jun–Sep active, Apr–May & Oct–Nov service -->
+          <div class="cal-region">EU Med</div>
+          <div class="cal-cell"></div><!-- Jan -->
+          <div class="cal-cell"></div><!-- Feb -->
+          <div class="cal-cell"></div><!-- Mar -->
+          <div class="cal-cell service"></div><!-- Apr -->
+          <div class="cal-cell service"></div><!-- May -->
+          <div class="cal-cell active"></div><!-- Jun -->
+          <div class="cal-cell active"></div><!-- Jul -->
+          <div class="cal-cell active"></div><!-- Aug -->
+          <div class="cal-cell active"></div><!-- Sep -->
+          <div class="cal-cell service"></div><!-- Oct -->
+          <div class="cal-cell service"></div><!-- Nov -->
+          <div class="cal-cell"></div><!-- Dec -->
+
+          <!-- Caribbean: Dec + Jan–Mar active -->
+          <div class="cal-region">Caribbean</div>
+          <div class="cal-cell active"></div><!-- Jan -->
+          <div class="cal-cell active"></div><!-- Feb -->
+          <div class="cal-cell active"></div><!-- Mar -->
+          <div class="cal-cell"></div>
+          <div class="cal-cell"></div>
+          <div class="cal-cell"></div>
+          <div class="cal-cell"></div>
+          <div class="cal-cell"></div>
+          <div class="cal-cell"></div>
+          <div class="cal-cell"></div>
+          <div class="cal-cell"></div>
+          <div class="cal-cell active"></div><!-- Dec -->
+
+          <!-- Pacific: full 12-month deployment (Year 2) -->
+          <div class="cal-region">Pacific</div>
+          <div class="cal-cell active-alt"></div>
+          <div class="cal-cell active-alt"></div>
+          <div class="cal-cell active-alt"></div>
+          <div class="cal-cell active-alt"></div>
+          <div class="cal-cell active-alt"></div>
+          <div class="cal-cell active-alt"></div>
+          <div class="cal-cell active-alt"></div>
+          <div class="cal-cell active-alt"></div>
+          <div class="cal-cell active-alt"></div>
+          <div class="cal-cell active-alt"></div>
+          <div class="cal-cell active-alt"></div>
+          <div class="cal-cell active-alt"></div>
+
+        </div><!-- /cal-grid -->
+
+        <div class="cal-legend">
+          <div class="legend-item"><div class="legend-swatch active"></div>High Season (Year 1)</div>
+          <div class="legend-item"><div class="legend-swatch active-alt"></div>Pacific Year 2</div>
+          <div class="legend-item"><div class="legend-swatch service"></div>Delivery / Service</div>
+        </div>
+
+      </div><!-- /calendar -->
+
+      <!-- OpEx callout row -->
+      <div class="opex-row">
+        <div class="opex-card">
+          <span class="opex-value">&euro;&thinsp;350&thinsp;K</span>
+          <span class="opex-label">Charter / Week</span>
+          <div class="opex-sub">Revenue directly to member</div>
+        </div>
+        <div class="opex-card">
+          <span class="opex-value">Montenegro</span>
+          <span class="opex-label">Base Location</span>
+          <div class="opex-sub">EU flag &nbsp;·&nbsp; Central Med access</div>
+        </div>
+      </div>
+
+    </div><!-- /p2-right -->
+
+  </div><!-- /page2-body -->
+
+  <!-- Footer bar -->
+  <footer class="page-footer">
+    <span class="footer-text">Details by Inquiry &nbsp;·&nbsp; Private Yacht Club &nbsp;·&nbsp; Boat International &nbsp;·&nbsp; 2026</span>
+  </footer>
+
+</div><!-- /page-2 -->
+
+</body>
+</html>
