@@ -178,34 +178,38 @@ function WeekCard({ week, slots, reqs, onAction }) {
 
   const WLABELS = ['Woche 1', 'Woche 2', 'Woche 3'];
 
-  const leftBorderColor = locked ? '#D97706' : ow.c;
-  const statusBg    = locked ? '#FEF3C7' : isUse ? '#DCFCE7' : isCh ? '#DBEAFE' : '#F3F4F6';
-  const statusColor = locked ? '#92400E' : isUse ? '#166534' : isCh ? '#1E40AF' : '#6B7280';
+  const accentColor = locked ? 'var(--gold)' : ow.c;
+  const statusBg    = locked ? ow.c + '22' : isUse ? '#14532d55' : isCh ? '#1e3a5f55' : 'rgba(249,246,240,.06)';
+  const statusColor = locked ? 'var(--gold)' : isUse ? '#86efac' : isCh ? '#7AB8D4' : 'rgba(249,246,240,.45)';
   const statusIcon  = locked ? (pend ? '⏳' : '✓') : isUse ? '✓' : isCh ? '⛵' : '○';
 
   return (
     <div className="card-updated" style={{
-      borderRadius: 8, background: '#FFFFFF',
-      borderLeft: `4px solid ${leftBorderColor}`,
-      border: `1px solid #E5E7EB`,
-      borderLeftWidth: 4, borderLeftColor: leftBorderColor,
+      borderRadius: 8,
+      background: isMine ? '#18284A' : 'var(--navy-mid)',
+      borderLeft: `4px solid ${accentColor}`,
+      border: `1px solid ${ow.c}33`,
+      borderLeftWidth: 4, borderLeftColor: accentColor,
       overflow: 'hidden', marginBottom: 5,
-      boxShadow: '0 1px 4px rgba(0,0,0,.08)',
+      boxShadow: isMine ? `0 2px 10px ${ow.c}22` : 'none',
     }}>
       <div style={{ padding: '10px 12px', display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
         {/* Owner avatar */}
         <div style={{
-          width: 28, height: 28, borderRadius: '50%', background: ow.c,
-          color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontWeight: 900, fontSize: 13, flexShrink: 0
+          width: 26, height: 26, borderRadius: '50%',
+          background: ow.c + (isMine ? 'dd' : '55'),
+          border: `2px solid ${ow.c}`,
+          color: isMine ? 'var(--navy)' : ow.c,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontWeight: 900, fontSize: 12, flexShrink: 0
         }}>{week.owner}</div>
         {/* Week label + dates */}
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontWeight: 700, fontSize: 13, color: '#111827' }}>
+          <div style={{ fontWeight: 700, fontSize: 13, color: isMine ? 'var(--cream)' : 'rgba(249,246,240,.7)' }}>
             {WLABELS[week.wn - 1]}
-            {week.isPremium && <span style={{ color: '#D97706', marginLeft: 6, fontSize: 12 }}>★</span>}
+            {week.isPremium && <span style={{ color: 'var(--gold)', marginLeft: 6, fontSize: 12 }}>★</span>}
           </div>
-          <div style={{ fontSize: 11, color: '#6B7280', marginTop: 1 }}>
+          <div style={{ fontSize: 11, color: 'rgba(249,246,240,.4)', marginTop: 1 }}>
             {fmt(week.start)} – {fmt(week.end)}
           </div>
         </div>
@@ -221,29 +225,29 @@ function WeekCard({ week, slots, reqs, onAction }) {
             <>
               <button onClick={() => onAction(week, 'use')} style={{
                 flex: '1 1 80px', padding: '7px 4px', borderRadius: 6, fontWeight: 700, fontSize: 11,
-                border: `2px solid ${isUse ? '#16A34A' : '#D1FAE5'}`,
-                background: isUse ? '#16A34A' : '#F0FDF4',
-                color: isUse ? '#fff' : '#166534'
+                border: `2px solid ${isUse ? '#86efac' : '#86efac44'}`,
+                background: isUse ? '#14532d' : 'transparent',
+                color: '#86efac'
               }}>{isUse ? '✓ Genutzt ↩' : '✓ Nutzen'}</button>
               <button onClick={() => onAction(week, 'charter')} style={{
                 flex: '1 1 90px', padding: '7px 4px', borderRadius: 6, fontWeight: 700, fontSize: 11,
-                border: `2px solid ${isCh ? '#2563EB' : '#BFDBFE'}`,
-                background: isCh ? '#2563EB' : '#EFF6FF',
-                color: isCh ? '#fff' : '#1E40AF'
+                border: `2px solid ${isCh ? '#7AB8D4' : '#7AB8D444'}`,
+                background: isCh ? '#1e3a5f' : 'transparent',
+                color: '#7AB8D4'
               }}>{isCh ? '⛵ Charter ↩' : '⛵ Verchartern'}</button>
               <button onClick={() => onAction(week, 'swap')} style={{
                 flex: '1 1 80px', padding: '7px 4px', borderRadius: 6, fontWeight: 700, fontSize: 11,
-                border: '2px solid #FDE68A', background: '#FFFBEB', color: '#92400E'
+                border: `2px solid var(--gold-lt)44`, background: 'transparent', color: 'var(--gold-lt)'
               }}>⇄ Tauschen</button>
               <button onClick={() => onAction(week, 'sell')} style={{
                 flex: '1 1 100px', padding: '7px 4px', borderRadius: 6, fontWeight: 700, fontSize: 11,
-                border: '2px solid #FECACA', background: '#FEF2F2', color: '#B91C1C'
+                border: '2px solid #f8717144', background: 'transparent', color: '#f87171'
               }}>💸 Verkaufen</button>
             </>
           ) : (
             <button onClick={() => onAction(week, 'buy')} style={{
               width: '100%', padding: '8px 0', borderRadius: 6, fontWeight: 700, fontSize: 12,
-              border: `2px solid ${ow.c}55`, background: ow.bg.replace('#','') ? ow.bg + '18' : '#F9FAFB',
+              border: `2px solid ${ow.c}44`, background: 'transparent',
               color: ow.c
             }}>💰 Woche kaufen · {eur(WP)}</button>
           )}
@@ -259,38 +263,40 @@ function SlotPanel({ slot, slots, reqs, onWeekAction, onClose }) {
   const myCount = slot.weeks.filter(w => w.owner === ME).length;
   return (
     <div style={{
-      gridColumn: '1 / -1', background: '#FFFFFF', borderRadius: 12,
-      border: `3px solid ${ow.c}`,
-      boxShadow: `0 8px 40px rgba(0,0,0,.25)`,
+      gridColumn: '1 / -1', background: 'var(--navy-mid)', borderRadius: 12,
+      border: `2px solid ${ow.c}`,
+      boxShadow: `0 8px 40px rgba(0,0,0,.5), 0 0 0 1px ${ow.c}33`,
       overflow: 'hidden', marginTop: 6, marginBottom: 2
     }}>
+      {/* Thick color bar */}
+      <div style={{ height: 6, background: ow.c }} />
       {/* Panel header */}
-      <div style={{ background: ow.c, padding: '14px 20px', display: 'flex', alignItems: 'center', gap: 14 }}>
+      <div style={{ background: ow.c + '18', borderBottom: `1px solid ${ow.c}44`, padding: '14px 20px', display: 'flex', alignItems: 'center', gap: 14 }}>
         <div style={{
           width: 44, height: 44, borderRadius: '50%',
-          background: 'rgba(255,255,255,.25)', color: '#fff',
+          background: ow.c, color: 'var(--navy)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           fontWeight: 900, fontSize: 20, flexShrink: 0,
-          border: '2px solid rgba(255,255,255,.5)'
+          boxShadow: `0 0 0 3px ${ow.c}44`
         }}>{slot.origOwner}</div>
         <div style={{ flex: 1 }}>
-          <div style={{ color: '#fff', fontWeight: 800, fontSize: 18 }}>
+          <div style={{ color: ow.c, fontWeight: 800, fontSize: 18 }}>
             {slot.prem ? '★ ' : ''}{slot.label}
-            <span style={{ fontWeight: 400, fontSize: 13, marginLeft: 12, opacity: .75 }}>
+            <span style={{ fontWeight: 400, fontSize: 13, marginLeft: 12, opacity: .6, color: 'var(--cream)' }}>
               {fmts(slot.start)} – {fmts(slot.end)}
             </span>
           </div>
-          <div style={{ color: 'rgba(255,255,255,.75)', fontSize: 12, marginTop: 2 }}>
+          <div style={{ color: 'rgba(249,246,240,.5)', fontSize: 12, marginTop: 2 }}>
             {slot.qual} · {slot.type === 'EU' ? 'Mittelmeer' : 'Karibik'} · {ow.name}
-            {myCount > 0 && <span style={{ marginLeft: 8, fontWeight: 700, color: '#fff' }}>· {myCount}/3 Wochen Ihre</span>}
+            {myCount > 0 && <span style={{ marginLeft: 8, fontWeight: 700, color: ow.c }}>· {myCount}/3 Wochen Ihre</span>}
           </div>
         </div>
         <button onClick={onClose} style={{
-          background: 'rgba(255,255,255,.2)', border: '2px solid rgba(255,255,255,.5)',
-          color: '#fff', borderRadius: 20, padding: '8px 20px', fontWeight: 700, fontSize: 13
+          background: 'transparent', border: `2px solid ${ow.c}`,
+          color: ow.c, borderRadius: 20, padding: '8px 20px', fontWeight: 700, fontSize: 13
         }}>← Zurück</button>
       </div>
-      <div style={{ padding: '14px 18px', display: 'flex', flexDirection: 'column', gap: 6, background: '#F9FAFB' }}>
+      <div style={{ padding: '14px 18px', display: 'flex', flexDirection: 'column', gap: 6 }}>
         {slot.weeks.map(w => (
           <WeekCard key={w.id} week={w} slots={slots} reqs={reqs}
             onAction={(w, action) => onWeekAction(w, action)} />
@@ -302,52 +308,53 @@ function SlotPanel({ slot, slots, reqs, onWeekAction, onClose }) {
 
 // ── SLOT CARD ─────────────────────────────────────────────────────────────────
 function SlotCard({ slot, reqs, expanded, onToggle }) {
-  const ow   = O[slot.origOwner];
-  const myW  = slot.weeks.filter(w => w.owner === ME).length;
-  const anyP = slot.weeks.some(w => pendingReq(reqs, w.id));
-  const use  = slot.weeks.filter(w => w.owner === ME && w.status === 'use').length;
-  const ch   = slot.weeks.filter(w => w.owner === ME && w.status === 'charter').length;
-  const op   = slot.weeks.filter(w => w.owner === ME && !w.status).length;
-  const isMine = myW === 3;
+  const ow      = O[slot.origOwner];
+  const myW     = slot.weeks.filter(w => w.owner === ME).length;
+  const anyP    = slot.weeks.some(w => pendingReq(reqs, w.id));
+  const use     = slot.weeks.filter(w => w.owner === ME && w.status === 'use').length;
+  const ch      = slot.weeks.filter(w => w.owner === ME && w.status === 'charter').length;
+  const op      = slot.weeks.filter(w => w.owner === ME && !w.status).length;
+  const hasWeeks = myW > 0;
 
   return (
     <div onClick={onToggle} style={{
       borderRadius: 10, overflow: 'hidden', cursor: 'pointer',
-      background: '#FFFFFF',
-      border: expanded ? `3px solid ${ow.c}` : `2px solid ${isMine ? ow.c : '#E5E7EB'}`,
+      background: 'var(--navy-card)',
+      border: `1px solid ${expanded ? ow.c : ow.c + '44'}`,
       boxShadow: expanded
-        ? `0 0 0 3px ${ow.c}33, 0 8px 32px rgba(0,0,0,.2)`
-        : isMine ? `0 4px 16px ${ow.c}33` : '0 2px 8px rgba(0,0,0,.08)',
+        ? `0 0 0 2px ${ow.c}55, 0 8px 32px rgba(0,0,0,.5)`
+        : hasWeeks ? `0 3px 12px rgba(0,0,0,.4)` : '0 2px 6px rgba(0,0,0,.25)',
+      opacity: hasWeeks ? 1 : 0.5,
       userSelect: 'none',
       transition: 'all .2s',
-      transform: expanded ? 'scale(1.005)' : 'scale(1)',
     }}>
-      {/* Colored header — full owner color */}
-      <div style={{ background: ow.c, padding: '10px 12px', display: 'flex', alignItems: 'center', gap: 8 }}>
-        {/* Owner circle */}
+      {/* Thick color bar — the primary differentiator */}
+      <div style={{ height: 5, background: ow.c, opacity: hasWeeks ? 1 : 0.6 }} />
+      {/* Header row */}
+      <div style={{ background: ow.c + '18', borderBottom: `1px solid ${ow.c}30`, padding: '9px 12px', display: 'flex', alignItems: 'center', gap: 7 }}>
+        {/* Owner badge */}
         <div style={{
-          width: 30, height: 30, borderRadius: '50%',
-          background: 'rgba(255,255,255,.25)', border: '2px solid rgba(255,255,255,.6)',
-          color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontWeight: 900, fontSize: 14, flexShrink: 0
+          width: 26, height: 26, borderRadius: '50%',
+          background: hasWeeks ? ow.c : ow.c + '55',
+          color: hasWeeks ? 'var(--navy)' : ow.c,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontWeight: 900, fontSize: 12, flexShrink: 0,
+          border: hasWeeks ? 'none' : `1.5px solid ${ow.c}`,
         }}>{slot.origOwner}</div>
-        {/* Slot name */}
+        {/* Label */}
         <div style={{ flex: 1 }}>
-          <div style={{ color: '#fff', fontWeight: 800, fontSize: 13, lineHeight: 1.2 }}>
+          <div style={{ fontWeight: 800, color: hasWeeks ? ow.c : ow.c + 'aa', fontSize: 12 }}>
             {slot.prem ? '★ ' : ''}{slot.label}
           </div>
-          <div style={{ color: 'rgba(255,255,255,.75)', fontSize: 10, marginTop: 1 }}>
-            {ow.name}
-          </div>
         </div>
-        {/* "MEIN SLOT" badge */}
-        {isMine && (
-          <span style={{ background: 'rgba(255,255,255,.25)', color: '#fff', fontSize: 9, fontWeight: 800, borderRadius: 8, padding: '2px 7px', flexShrink: 0, border: '1px solid rgba(255,255,255,.4)' }}>
+        {/* Ownership badge */}
+        {myW === 3 && (
+          <span style={{ background: ow.c + '33', color: ow.c, fontSize: 9, fontWeight: 800, borderRadius: 6, padding: '2px 7px', flexShrink: 0, border: `1px solid ${ow.c}55` }}>
             MEIN SLOT
           </span>
         )}
-        {myW > 0 && !isMine && (
-          <span style={{ background: 'rgba(255,255,255,.2)', color: '#fff', fontSize: 9, fontWeight: 700, borderRadius: 8, padding: '2px 7px', flexShrink: 0 }}>
+        {myW > 0 && myW < 3 && (
+          <span style={{ background: ow.c + '22', color: ow.c, fontSize: 9, fontWeight: 700, borderRadius: 6, padding: '2px 7px', flexShrink: 0 }}>
             {myW}/3
           </span>
         )}
@@ -360,32 +367,34 @@ function SlotCard({ slot, reqs, expanded, onToggle }) {
               <div key={w.id}
                 title={p ? 'Anfrage läuft' : d ? 'Abgeschlossen' : w.status === 'use' ? 'Genutzt' : w.status === 'charter' ? 'Charter' : 'Offen'}
                 style={{
-                  width: 11, height: 11, borderRadius: 3,
-                  background: p ? '#FCD34D' : d ? '#A78BFA'
-                    : w.status === 'use' ? '#22C55E'
-                    : w.status === 'charter' ? '#60A5FA'
-                    : 'rgba(255,255,255,.35)',
-                  border: '1.5px solid rgba(255,255,255,.5)',
+                  width: 10, height: 10, borderRadius: 3,
+                  background: p ? 'var(--gold)' : d ? '#C4B5FD'
+                    : w.status === 'use' ? '#86efac'
+                    : w.status === 'charter' ? '#7AB8D4'
+                    : 'rgba(249,246,240,.15)',
+                  border: `1.5px solid rgba(249,246,240,.2)`,
                 }} />
             );
           })}
         </div>
-        <span style={{ color: 'rgba(255,255,255,.7)', fontSize: 13, transform: expanded ? 'rotate(90deg)' : 'none', transition: '.2s' }}>▶</span>
+        <span style={{ color: ow.c + 'aa', fontSize: 12, transform: expanded ? 'rotate(90deg)' : 'none', transition: '.2s' }}>▶</span>
       </div>
-      {/* White body */}
-      <div style={{ padding: '10px 12px', background: isMine ? '#FAFAFA' : '#FFFFFF' }}>
-        <div style={{ fontWeight: 700, fontSize: 12, color: '#111827', marginBottom: 2 }}>
+      {/* Card body */}
+      <div style={{ padding: '9px 12px' }}>
+        <div style={{ fontWeight: 700, fontSize: 12, color: hasWeeks ? 'var(--cream)' : 'rgba(249,246,240,.45)', marginBottom: 1 }}>
           {fmts(slot.start)} – {fmts(slot.end)}
         </div>
-        <div style={{ fontSize: 10, color: slot.prem ? '#D97706' : '#9CA3AF', fontWeight: slot.prem ? 700 : 400, marginBottom: 7 }}>
+        <div style={{ fontSize: 10, color: slot.prem ? 'var(--gold)' : 'rgba(249,246,240,.35)', fontWeight: slot.prem ? 700 : 400, marginBottom: 6 }}>
           {slot.qual}
         </div>
-        <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-          {use  > 0 && <Pill bg="#DCFCE7" color="#166534">{use}W ✓</Pill>}
-          {ch   > 0 && <Pill bg="#DBEAFE" color="#1E40AF">{ch}W ⛵</Pill>}
-          {op   > 0 && <Pill bg="#F3F4F6" color={ow.c}>{op}W ○</Pill>}
-          {anyP      && <Pill bg="#FEF3C7" color="#92400E">⏳</Pill>}
-        </div>
+        {hasWeeks && (
+          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+            {use  > 0 && <Pill bg="#14532d55" color="#86efac">{use}W ✓</Pill>}
+            {ch   > 0 && <Pill bg="#1e3a5f55" color="#7AB8D4">{ch}W ⛵</Pill>}
+            {op   > 0 && <Pill bg={ow.c + '22'} color={ow.c}>{op}W ○</Pill>}
+            {anyP      && <Pill bg="rgba(184,147,42,.2)" color="var(--gold)">⏳</Pill>}
+          </div>
+        )}
       </div>
     </div>
   );
