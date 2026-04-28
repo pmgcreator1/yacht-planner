@@ -98,23 +98,16 @@ function buildInitialState() {
 
 const INITIAL_STATE = buildInitialState();
 
-function loadDb() {
-  try {
-    return JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
-  } catch {
-    return null;
-  }
-}
+// In-memory database (works locally and on Vercel).
+// On Vercel serverless, state resets on cold start → demo seed always available.
+// For persistent multi-user state, replace with Vercel KV or Upstash Redis.
+let db = JSON.parse(JSON.stringify(INITIAL_STATE));
 
+function loadDb() { return db; }
 function saveDb(data) {
-  fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2), 'utf8');
-}
-
-let db = loadDb();
-if (!db || !db.weeks || db.weeks.length === 0) {
-  db = JSON.parse(JSON.stringify(INITIAL_STATE));
-  saveDb(db);
-  console.log('db.json initialized with demo state');
+  db = data;
+  // Also persist locally when running on disk (dev mode)
+  try { fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2), 'utf8'); } catch {}
 }
 
 // ── HELPERS ────────────────────────────────────────────────────────────────────
@@ -246,4 +239,8 @@ app.use((err, req, res, next) => {
   res.status(500).json({ ok: false, error: err.message });
 });
 
-app.listen(3000, () => console.log('Yacht Planner running on http://localhost:3000'));
+// Local dev: start server directly. Vercel imports this file as a module.
+if (require.main === module) {
+  app.listen(3000, () => console.log('Yacht Planner running on http://localhost:3000'));
+}
+module.exports = app;
