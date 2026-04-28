@@ -176,92 +176,76 @@ function WeekCard({ week, slots, reqs, onAction }) {
       : isCh  ? 'Verchartert'
       : 'Noch offen';
 
-  const WLABELS = ['Erste Woche', 'Zweite Woche', 'Dritte Woche'];
+  const WLABELS = ['Woche 1', 'Woche 2', 'Woche 3'];
 
-  const stripBg    = locked ? 'var(--gold)' : ow.c;
-  const stripColor = locked ? 'var(--navy)' : 'var(--cream)';
-  const cardBg     = locked ? '#1C1505'
-                   : isUse  ? '#071507'
-                   : isCh   ? '#051520'
-                   : 'var(--navy-card)';
-  const cardBd     = locked ? 'var(--gold)' : ow.c + '55';
-  const statusColor = locked ? 'var(--gold)'
-                    : isUse  ? 'var(--green)'
-                    : isCh   ? 'var(--blue)'
-                    : 'rgba(249,246,240,.4)';
+  const leftBorderColor = locked ? '#D97706' : ow.c;
+  const statusBg    = locked ? '#FEF3C7' : isUse ? '#DCFCE7' : isCh ? '#DBEAFE' : '#F3F4F6';
+  const statusColor = locked ? '#92400E' : isUse ? '#166534' : isCh ? '#1E40AF' : '#6B7280';
+  const statusIcon  = locked ? (pend ? '⏳' : '✓') : isUse ? '✓' : isCh ? '⛵' : '○';
 
   return (
     <div className="card-updated" style={{
-      borderRadius: 10, border: `1.5px solid ${cardBd}`,
-      background: cardBg, overflow: 'hidden', marginBottom: 5,
-      transition: 'border-color .3s'
+      borderRadius: 8, background: '#FFFFFF',
+      borderLeft: `4px solid ${leftBorderColor}`,
+      border: `1px solid #E5E7EB`,
+      borderLeftWidth: 4, borderLeftColor: leftBorderColor,
+      overflow: 'hidden', marginBottom: 5,
+      boxShadow: '0 1px 4px rgba(0,0,0,.08)',
     }}>
-      {/* Color strip */}
-      <div style={{ background: stripBg, padding: '4px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span style={{ color: stripColor, fontWeight: 700, fontSize: 11 }}>
-          {isMine ? '● MEINE WOCHE' : `● ${ow.name}`}
-        </span>
-        {week.isPremium && (
-          <span style={{ background: 'rgba(0,0,0,.25)', color: stripColor, fontSize: 10, fontWeight: 700, borderRadius: 10, padding: '1px 8px' }}>
-            ★ Hochsaison
-          </span>
-        )}
-      </div>
-      {/* Content */}
-      <div style={{ padding: '8px 12px', borderBottom: `1px solid ${cardBd}`, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-        <span style={{ background: stripBg + '33', color: ow.c, fontWeight: 700, fontSize: 11, borderRadius: 20, padding: '3px 10px', whiteSpace: 'nowrap', border: `1px solid ${ow.c}44` }}>
-          {WLABELS[week.wn - 1]}
-        </span>
+      <div style={{ padding: '10px 12px', display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+        {/* Owner avatar */}
+        <div style={{
+          width: 28, height: 28, borderRadius: '50%', background: ow.c,
+          color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontWeight: 900, fontSize: 13, flexShrink: 0
+        }}>{week.owner}</div>
+        {/* Week label + dates */}
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--cream)' }}>
+          <div style={{ fontWeight: 700, fontSize: 13, color: '#111827' }}>
+            {WLABELS[week.wn - 1]}
+            {week.isPremium && <span style={{ color: '#D97706', marginLeft: 6, fontSize: 12 }}>★</span>}
+          </div>
+          <div style={{ fontSize: 11, color: '#6B7280', marginTop: 1 }}>
             {fmt(week.start)} – {fmt(week.end)}
           </div>
         </div>
-        <div style={{ fontSize: 12, fontWeight: 600, color: statusColor, whiteSpace: 'nowrap' }}>
-          {locked && (pend ? '⏳ ' : '✓ ')}{statusTxt}
-        </div>
+        {/* Status badge */}
+        <span style={{ background: statusBg, color: statusColor, fontSize: 11, fontWeight: 700, borderRadius: 20, padding: '3px 10px', whiteSpace: 'nowrap' }}>
+          {statusIcon} {statusTxt}
+        </span>
       </div>
       {/* Action buttons */}
       {!locked && (
-        <div style={{ padding: '8px 12px', display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+        <div style={{ padding: '0 12px 10px', display: 'flex', gap: 6, flexWrap: 'wrap' }}>
           {isMine ? (
             <>
               <button onClick={() => onAction(week, 'use')} style={{
-                flex: '1 1 80px', padding: '8px 4px', borderRadius: 7, fontWeight: 700, fontSize: 12,
-                border: `2px solid ${isUse ? 'var(--green)' : 'rgba(134,239,172,.4)'}`,
-                background: isUse ? 'var(--green)' : 'transparent',
-                color: isUse ? 'var(--navy)' : 'var(--green)'
-              }}>
-                {isUse ? '✓ Genutzt ↩' : '✓ Nutzen'}
-              </button>
+                flex: '1 1 80px', padding: '7px 4px', borderRadius: 6, fontWeight: 700, fontSize: 11,
+                border: `2px solid ${isUse ? '#16A34A' : '#D1FAE5'}`,
+                background: isUse ? '#16A34A' : '#F0FDF4',
+                color: isUse ? '#fff' : '#166534'
+              }}>{isUse ? '✓ Genutzt ↩' : '✓ Nutzen'}</button>
               <button onClick={() => onAction(week, 'charter')} style={{
-                flex: '1 1 90px', padding: '8px 4px', borderRadius: 7, fontWeight: 700, fontSize: 12,
-                border: `2px solid ${isCh ? 'var(--blue)' : 'rgba(122,184,212,.4)'}`,
-                background: isCh ? 'var(--blue)' : 'transparent',
-                color: isCh ? 'var(--navy)' : 'var(--blue)'
-              }}>
-                {isCh ? '⛵ Charter ↩' : '⛵ Verchartern'}
-              </button>
+                flex: '1 1 90px', padding: '7px 4px', borderRadius: 6, fontWeight: 700, fontSize: 11,
+                border: `2px solid ${isCh ? '#2563EB' : '#BFDBFE'}`,
+                background: isCh ? '#2563EB' : '#EFF6FF',
+                color: isCh ? '#fff' : '#1E40AF'
+              }}>{isCh ? '⛵ Charter ↩' : '⛵ Verchartern'}</button>
               <button onClick={() => onAction(week, 'swap')} style={{
-                flex: '1 1 80px', padding: '8px 4px', borderRadius: 7, fontWeight: 700, fontSize: 12,
-                border: '2px solid rgba(184,147,42,.5)', background: 'transparent', color: 'var(--gold)'
-              }}>
-                ⇄ Tauschen
-              </button>
+                flex: '1 1 80px', padding: '7px 4px', borderRadius: 6, fontWeight: 700, fontSize: 11,
+                border: '2px solid #FDE68A', background: '#FFFBEB', color: '#92400E'
+              }}>⇄ Tauschen</button>
               <button onClick={() => onAction(week, 'sell')} style={{
-                flex: '1 1 120px', padding: '8px 4px', borderRadius: 7, fontWeight: 700, fontSize: 12,
-                border: '2px solid rgba(248,113,113,.4)', background: 'transparent', color: 'var(--red)'
-              }}>
-                💸 Verkaufen ({eur(WP)})
-              </button>
+                flex: '1 1 100px', padding: '7px 4px', borderRadius: 6, fontWeight: 700, fontSize: 11,
+                border: '2px solid #FECACA', background: '#FEF2F2', color: '#B91C1C'
+              }}>💸 Verkaufen</button>
             </>
           ) : (
             <button onClick={() => onAction(week, 'buy')} style={{
-              width: '100%', padding: '9px 0', borderRadius: 7, fontWeight: 700, fontSize: 13,
-              border: `2px solid ${ow.c}77`, background: 'transparent', color: ow.c
-            }}>
-              💰 Woche kaufen · {eur(WP)}
-            </button>
+              width: '100%', padding: '8px 0', borderRadius: 6, fontWeight: 700, fontSize: 12,
+              border: `2px solid ${ow.c}55`, background: ow.bg.replace('#','') ? ow.bg + '18' : '#F9FAFB',
+              color: ow.c
+            }}>💰 Woche kaufen · {eur(WP)}</button>
           )}
         </div>
       )}
@@ -275,29 +259,38 @@ function SlotPanel({ slot, slots, reqs, onWeekAction, onClose }) {
   const myCount = slot.weeks.filter(w => w.owner === ME).length;
   return (
     <div style={{
-      gridColumn: '1 / -1', background: 'var(--navy-mid)', borderRadius: 12,
-      border: `2px solid ${ow.c}`, boxShadow: `0 8px 40px rgba(0,0,0,.5), 0 0 0 1px ${ow.c}22`,
+      gridColumn: '1 / -1', background: '#FFFFFF', borderRadius: 12,
+      border: `3px solid ${ow.c}`,
+      boxShadow: `0 8px 40px rgba(0,0,0,.25)`,
       overflow: 'hidden', marginTop: 6, marginBottom: 2
     }}>
-      <div style={{ background: ow.c + '18', borderBottom: `1px solid ${ow.c}55`, padding: '14px 20px', display: 'flex', alignItems: 'center', gap: 12 }}>
+      {/* Panel header */}
+      <div style={{ background: ow.c, padding: '14px 20px', display: 'flex', alignItems: 'center', gap: 14 }}>
+        <div style={{
+          width: 44, height: 44, borderRadius: '50%',
+          background: 'rgba(255,255,255,.25)', color: '#fff',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontWeight: 900, fontSize: 20, flexShrink: 0,
+          border: '2px solid rgba(255,255,255,.5)'
+        }}>{slot.origOwner}</div>
         <div style={{ flex: 1 }}>
-          <div style={{ color: ow.c, fontWeight: 800, fontSize: 17 }}>
+          <div style={{ color: '#fff', fontWeight: 800, fontSize: 18 }}>
             {slot.prem ? '★ ' : ''}{slot.label}
-            <span style={{ fontWeight: 400, fontSize: 13, marginLeft: 12, opacity: .6, color: 'var(--cream)' }}>
+            <span style={{ fontWeight: 400, fontSize: 13, marginLeft: 12, opacity: .75 }}>
               {fmts(slot.start)} – {fmts(slot.end)}
             </span>
           </div>
-          <div style={{ color: 'rgba(249,246,240,.5)', fontSize: 12, marginTop: 2 }}>
+          <div style={{ color: 'rgba(255,255,255,.75)', fontSize: 12, marginTop: 2 }}>
             {slot.qual} · {slot.type === 'EU' ? 'Mittelmeer' : 'Karibik'} · {ow.name}
-            {myCount > 0 && <span style={{ marginLeft: 8, fontWeight: 700, color: ow.c }}>· {myCount}/3 Wochen Ihre</span>}
+            {myCount > 0 && <span style={{ marginLeft: 8, fontWeight: 700, color: '#fff' }}>· {myCount}/3 Wochen Ihre</span>}
           </div>
         </div>
         <button onClick={onClose} style={{
-          background: 'transparent', border: `1px solid ${ow.c}`,
-          color: ow.c, borderRadius: 20, padding: '8px 20px', fontWeight: 700, fontSize: 13
+          background: 'rgba(255,255,255,.2)', border: '2px solid rgba(255,255,255,.5)',
+          color: '#fff', borderRadius: 20, padding: '8px 20px', fontWeight: 700, fontSize: 13
         }}>← Zurück</button>
       </div>
-      <div style={{ padding: '14px 18px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <div style={{ padding: '14px 18px', display: 'flex', flexDirection: 'column', gap: 6, background: '#F9FAFB' }}>
         {slot.weeks.map(w => (
           <WeekCard key={w.id} week={w} slots={slots} reqs={reqs}
             onAction={(w, action) => onWeekAction(w, action)} />
@@ -315,29 +308,50 @@ function SlotCard({ slot, reqs, expanded, onToggle }) {
   const use  = slot.weeks.filter(w => w.owner === ME && w.status === 'use').length;
   const ch   = slot.weeks.filter(w => w.owner === ME && w.status === 'charter').length;
   const op   = slot.weeks.filter(w => w.owner === ME && !w.status).length;
+  const isMine = myW === 3;
 
   return (
     <div onClick={onToggle} style={{
       borderRadius: 10, overflow: 'hidden', cursor: 'pointer',
-      border: `1.5px solid ${expanded ? ow.c : ow.c + '44'}`,
-      background: expanded ? ow.bg : 'var(--navy-card)',
+      background: '#FFFFFF',
+      border: expanded ? `3px solid ${ow.c}` : `2px solid ${isMine ? ow.c : '#E5E7EB'}`,
       boxShadow: expanded
-        ? `0 0 0 2px ${ow.c}44, 0 6px 24px rgba(0,0,0,.4)`
-        : '0 2px 8px rgba(0,0,0,.3)',
-      opacity: myW > 0 ? 1 : .6,
+        ? `0 0 0 3px ${ow.c}33, 0 8px 32px rgba(0,0,0,.2)`
+        : isMine ? `0 4px 16px ${ow.c}33` : '0 2px 8px rgba(0,0,0,.08)',
       userSelect: 'none',
-      transition: 'border-color .2s, box-shadow .2s, opacity .2s'
+      transition: 'all .2s',
+      transform: expanded ? 'scale(1.005)' : 'scale(1)',
     }}>
-      {/* Header strip */}
-      <div style={{ background: ow.c + '28', borderBottom: `1px solid ${ow.c}33`, padding: '9px 12px', display: 'flex', alignItems: 'center', gap: 7 }}>
-        <span style={{ fontWeight: 800, color: ow.c, fontSize: 12, flex: 1 }}>
-          {slot.prem ? '★ ' : ''}{slot.label}
-        </span>
-        {myW > 0 && (
-          <span style={{ background: ow.c + '33', color: ow.c, fontSize: 9, fontWeight: 800, borderRadius: 10, padding: '2px 8px', flexShrink: 0 }}>
-            {myW === 3 ? 'MEIN SLOT' : `${myW}/3 Wochen`}
+      {/* Colored header — full owner color */}
+      <div style={{ background: ow.c, padding: '10px 12px', display: 'flex', alignItems: 'center', gap: 8 }}>
+        {/* Owner circle */}
+        <div style={{
+          width: 30, height: 30, borderRadius: '50%',
+          background: 'rgba(255,255,255,.25)', border: '2px solid rgba(255,255,255,.6)',
+          color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontWeight: 900, fontSize: 14, flexShrink: 0
+        }}>{slot.origOwner}</div>
+        {/* Slot name */}
+        <div style={{ flex: 1 }}>
+          <div style={{ color: '#fff', fontWeight: 800, fontSize: 13, lineHeight: 1.2 }}>
+            {slot.prem ? '★ ' : ''}{slot.label}
+          </div>
+          <div style={{ color: 'rgba(255,255,255,.75)', fontSize: 10, marginTop: 1 }}>
+            {ow.name}
+          </div>
+        </div>
+        {/* "MEIN SLOT" badge */}
+        {isMine && (
+          <span style={{ background: 'rgba(255,255,255,.25)', color: '#fff', fontSize: 9, fontWeight: 800, borderRadius: 8, padding: '2px 7px', flexShrink: 0, border: '1px solid rgba(255,255,255,.4)' }}>
+            MEIN SLOT
           </span>
         )}
+        {myW > 0 && !isMine && (
+          <span style={{ background: 'rgba(255,255,255,.2)', color: '#fff', fontSize: 9, fontWeight: 700, borderRadius: 8, padding: '2px 7px', flexShrink: 0 }}>
+            {myW}/3
+          </span>
+        )}
+        {/* Status dots */}
         <div style={{ display: 'flex', gap: 3, flexShrink: 0 }}>
           {slot.weeks.map(w => {
             const p = pendingReq(reqs, w.id);
@@ -346,31 +360,31 @@ function SlotCard({ slot, reqs, expanded, onToggle }) {
               <div key={w.id}
                 title={p ? 'Anfrage läuft' : d ? 'Abgeschlossen' : w.status === 'use' ? 'Genutzt' : w.status === 'charter' ? 'Charter' : 'Offen'}
                 style={{
-                  width: 10, height: 10, borderRadius: 2,
-                  background: p ? 'var(--gold)' : d ? 'var(--purple)'
-                    : w.status === 'use' ? 'var(--green)'
-                    : w.status === 'charter' ? 'var(--blue)'
-                    : w.owner === ME ? 'rgba(249,246,240,.35)' : 'rgba(249,246,240,.1)',
-                  border: '1px solid rgba(249,246,240,.15)'
+                  width: 11, height: 11, borderRadius: 3,
+                  background: p ? '#FCD34D' : d ? '#A78BFA'
+                    : w.status === 'use' ? '#22C55E'
+                    : w.status === 'charter' ? '#60A5FA'
+                    : 'rgba(255,255,255,.35)',
+                  border: '1.5px solid rgba(255,255,255,.5)',
                 }} />
             );
           })}
         </div>
-        <span style={{ color: ow.c + '88', fontSize: 13, transform: expanded ? 'rotate(90deg)' : 'none', transition: '.2s', marginLeft: 2 }}>▶</span>
+        <span style={{ color: 'rgba(255,255,255,.7)', fontSize: 13, transform: expanded ? 'rotate(90deg)' : 'none', transition: '.2s' }}>▶</span>
       </div>
-      {/* Body */}
-      <div style={{ padding: '8px 12px' }}>
-        <div style={{ fontWeight: 700, fontSize: 12, color: 'var(--cream)', marginBottom: 1 }}>
+      {/* White body */}
+      <div style={{ padding: '10px 12px', background: isMine ? '#FAFAFA' : '#FFFFFF' }}>
+        <div style={{ fontWeight: 700, fontSize: 12, color: '#111827', marginBottom: 2 }}>
           {fmts(slot.start)} – {fmts(slot.end)}
         </div>
-        <div style={{ fontSize: 10, color: slot.prem ? 'var(--gold)' : 'rgba(249,246,240,.45)', fontWeight: slot.prem ? 700 : 400, marginBottom: 6 }}>
+        <div style={{ fontSize: 10, color: slot.prem ? '#D97706' : '#9CA3AF', fontWeight: slot.prem ? 700 : 400, marginBottom: 7 }}>
           {slot.qual}
         </div>
-        <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
-          {use  > 0 && <Pill bg="#071507" color="var(--green)">{use}W ✓</Pill>}
-          {ch   > 0 && <Pill bg="#051520" color="var(--blue)">{ch}W ⛵</Pill>}
-          {op   > 0 && <Pill bg={ow.bg}   color={ow.c}>{op}W ○</Pill>}
-          {anyP      && <Pill bg="#1C1505" color="var(--gold)">⏳</Pill>}
+        <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+          {use  > 0 && <Pill bg="#DCFCE7" color="#166534">{use}W ✓</Pill>}
+          {ch   > 0 && <Pill bg="#DBEAFE" color="#1E40AF">{ch}W ⛵</Pill>}
+          {op   > 0 && <Pill bg="#F3F4F6" color={ow.c}>{op}W ○</Pill>}
+          {anyP      && <Pill bg="#FEF3C7" color="#92400E">⏳</Pill>}
         </div>
       </div>
     </div>
