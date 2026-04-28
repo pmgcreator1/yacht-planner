@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yacht Planner · Private Yacht Club</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<style>
+:root {
+  --navy:      #0C1C38;
+  --navy-mid:  #132040;
+  --navy-card: #162848;
+  --gold:      #B8932A;
+  --gold-lt:   #D4AF6A;
+  --cream:     #F9F6F0;
+  --green:     #86efac;
+  --blue:      #7AB8D4;
+  --red:       #f87171;
+  --purple:    #C4B5FD;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: system-ui, -apple-system, sans-serif; background: var(--navy); color: var(--cream); min-height: 100vh; }
+button { cursor: pointer; font-family: inherit; transition: opacity .15s; }
+button:hover:not(:disabled) { opacity: .85; }
+button:disabled { opacity: .35; cursor: default; }
+a { text-decoration: none; }
+
+/* Modal */
+.modal-bg {
+  position: fixed; inset: 0; background: rgba(0,0,0,.7);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 100; padding: 16px;
+  animation: fadeIn .15s ease;
+}
+.modal {
+  background: var(--navy-mid); border-radius: 14px;
+  border: 1px solid var(--gold); max-width: 680px; width: 100%;
+  max-height: 90vh; overflow-y: auto;
+  box-shadow: 0 24px 80px rgba(0,0,0,.6);
+  animation: slideUp .2s ease;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+/* Toast */
+.toast {
+  position: fixed; top: 20px; right: 20px; z-index: 200;
+  background: var(--navy-mid); color: var(--cream);
+  border-left: 4px solid var(--gold);
+  padding: 12px 20px; border-radius: 8px;
+  font-weight: 600; font-size: 14px; max-width: 360px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.4);
+  animation: toastIn .25s ease;
+}
+@keyframes toastIn { from { transform: translateX(80px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+/* Week card update animation */
+@keyframes cardPop {
+  0%   { transform: scale(.98); opacity: .7; }
+  60%  { transform: scale(1.01); }
+  100% { transform: scale(1); opacity: 1; }
+}
+.card-updated { animation: cardPop .4s ease; }
+
+/* Mobile */
+@media (max-width: 640px) {
+  .grid-3 { grid-template-columns: 1fr !important; }
+  .grid-2 { grid-template-columns: 1fr !important; }
+  .modal {
+    max-width: 100%; border-radius: 12px 12px 0 0;
+    position: fixed; bottom: 0; left: 0; right: 0;
+    max-height: 85vh; margin: 0;
+  }
+  .modal-bg { align-items: flex-end; padding: 0; }
+  .charter-grid { grid-template-columns: repeat(2,1fr) !important; }
+  .stats-scroll { overflow-x: auto; }
+  h1 { font-size: 16px !important; }
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useCallback, useRef } = React;
+
+// ── CONFIG ─────────────────────────────────────────────────────────────────────
+const YEAR0 = 2026;
+const WP = 250000;
+const CR = 325000;
+
+const O = {
+  A: { name: "Eigentümer A", c: "#B8932A", bg: "#1C1505", bd: "#B8932A55" },
+  B: { name: "Eigentümer B", c: "#7AB8D4", bg: "#041520", bd: "#7AB8D444" },
+  C: { name: "Eigentümer C", c: "#86efac", bg: "#041508", bd: "#86efac44" },
+};
+
+const EQ = {1:"Frühsaison",2:"Frühsommer",3:"Hauptsaison",4:"★ HOCHSOMMER",5:"★ HOCHSOMMER",6:"Nachsaison"};
+const KQ = {1:"Vorsaison",2:"★ WEIHNACHTEN",3:"★ NEUJAHR",4:"Hochsaison",5:"Nachsaison",6:"Spätsaison"};
+const MO = ["","Jan","Feb","Mär","Apr","Mai","Jun","Jul","Aug","Sep","Okt","Nov","Dez"];
+
+function getOwner() {
+  const p = new URLSearchParams(window.location.search);
+  const o = (p.get('owner') || '').toUpperCase();
+  return ['A','B','C'].includes(o) ? o : 'A';
+}
+const ME = getOwner();
+
+function fmt(d)  { const x = new Date(d); return `${String(x.getDate()).padStart(2,'0')}.${MO[x.getMonth()+1]}.${x.getFullYear()}`; }
+function fmts(d) { const x = new Date(d); return `${String(x.getDate()).padStart(2,'0')}.${MO[x.getMonth()+1]}`; }
+function eur(n)  { return "€ " + (n/1000).toFixed(0) + "k"; }
+
+function pendingReq(reqs, wid) {
+  return reqs.find(r => r.status === 'pending' && (r.myWid === wid || r.theirWid === wid || r.tgtWid === wid));
+}
+function doneReq(reqs, wid) {
+  return reqs.find(r => r.status === 'accepted' && (r.myWid === wid || r.theirWid === wid || r.tgtWid === wid));
+}
+function allWeeks(slots) { return slots.flatMap(s => s.weeks); }
+
+function buildSlots(weeks) {
+  const slotMap = {};
+  weeks.forEach(w => {
+    if (!slotMap[w.slotId]) {
+      slotMap[w.slotId] = {
+        id: w.slotId, yr: w.yr, sn: w.sn, type: w.type,
+        origOwner: w.origOwner, prem: w.isPremium,
+        qual: w.season,
+        label: w.slotLabel, slabel: w.slotShort,
+        start: w.start, end: null, weeks: []
+      };
+    }
+    slotMap[w.slotId].weeks.push(w);
+  });
+  Object.values(slotMap).forEach(s => {
+    s.weeks.sort((a, b) => a.wn - b.wn);
+    s.end = s.weeks[s.weeks.length - 1].end;
+  });
+  return Object.values(slotMap).sort((a, b) => {
+    if (a.yr !== b.yr) return a.yr - b.yr;
+    if (a.type !== b.type) return a.type === 'EU' ? -1 : 1;
+    return a.sn - b.sn;
+  });
+}
+
+// ── PILL ──────────────────────────────────────────────────────────────────────
+const Pill = ({ bg, color = '#fff', children }) => (
+  <span style={{
+    display: 'inline-block', padding: '2px 9px', borderRadius: 20,
+    fontSize: 11, fontWeight: 700, background: bg, color, whiteSpace: 'nowrap'
+  }}>{children}</span>
+);
+
+// ── WEEK CARD ─────────────────────────────────────────────────────────────────
+function WeekCard({ week, slots, reqs, onAction }) {
+  const isMine = week.owner === ME;
+  const ow     = O[week.owner];
+  const isUse  = week.status === 'use';
+  const isCh   = week.status === 'charter';
+  const pend   = pendingReq(reqs, week.id);
+  const doneR  = doneReq(reqs, week.id);
+  const locked = !!(pend || doneR);
+
+  const counter = pend && pend.type === 'swap'
+    ? allWeeks(slots).find(w => w.id === (pend.myWid === week.id ? pend.theirWid : pend.myWid))
+    : null;
+
+  const statusTxt = doneR
+    ? (doneR.type === 'swap' ? 'Getauscht' : doneR.type === 'buy' ? 'Zugekauft' : 'Verkauft')
+    : pend
+      ? (pend.type === 'swap' && counter
+          ? `Tausch ↔ ${fmts(counter.start)}–${fmts(counter.end)}`
+          : 'Anfrage läuft')
+      : isUse ? 'Wird genutzt'
+      : isCh  ? 'Verchartert'
+      : 'Noch offen';
+
+  const WLABELS = ['Erste Woche', 'Zweite Woche', 'Dritte Woche'];
+
+  const stripBg    = locked ? 'var(--gold)' : ow.c;
+  const stripColor = locked ? 'var(--navy)' : 'var(--cream)';
+  const cardBg     = locked ? '#1C1505'
+                   : isUse  ? '#071507'
+                   : isCh   ? '#051520'
+                   : 'var(--navy-card)';
+  const cardBd     = locked ? 'var(--gold)' : ow.c + '55';
+  const statusColor = locked ? 'var(--gold)'
+                    : isUse  ? 'var(--green)'
+                    : isCh   ? 'var(--blue)'
+                    : 'rgba(249,246,240,.4)';
+
+  return (
+    <div className="card-updated" style={{
+      borderRadius: 10, border: `1.5px solid ${cardBd}`,
+      background: cardBg, overflow: 'hidden', marginBottom: 5,
+      transition: 'border-color .3s'
+    }}>
+      {/* Color strip */}
+      <div style={{ background: stripBg, padding: '4px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <span style={{ color: stripColor, fontWeight: 700, fontSize: 11 }}>
+          {isMine ? '● MEINE WOCHE' : `● ${ow.name}`}
+        </span>
+        {week.isPremium && (
+          <span style={{ background: 'rgba(0,0,0,.25)', color: stripColor, fontSize: 10, fontWeight: 700, borderRadius: 10, padding: '1px 8px' }}>
+            ★ Hochsaison
+          </span>
+        )}
+      </div>
+      {/* Content */}
+      <div style={{ padding: '8px 12px', borderBottom: `1px solid ${cardBd}`, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+        <span style={{ background: stripBg + '33', color: ow.c, fontWeight: 700, fontSize: 11, borderRadius: 20, padding: '3px 10px', whiteSpace: 'nowrap', border: `1px solid ${ow.c}44` }}>
+          {WLABELS[week.wn - 1]}
+        </span>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--cream)' }}>
+            {fmt(week.start)} – {fmt(week.end)}
+          </div>
+        </div>
+        <div style={{ fontSize: 12, fontWeight: 600, color: statusColor, whiteSpace: 'nowrap' }}>
+          {locked && (pend ? '⏳ ' : '✓ ')}{statusTxt}
+        </div>
+      </div>
+      {/* Action buttons */}
+      {!locked && (
+        <div style={{ padding: '8px 12px', display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          {isMine ? (
+            <>
+              <button onClick={() => onAction(week, 'use')} style={{
+                flex: '1 1 80px', padding: '8px 4px', borderRadius: 7, fontWeight: 700, fontSize: 12,
+                border: `2px solid ${isUse ? 'var(--green)' : 'rgba(134,239,172,.4)'}`,
+                background: isUse ? 'var(--green)' : 'transparent',
+                color: isUse ? 'var(--navy)' : 'var(--green)'
+              }}>
+                {isUse ? '✓ Genutzt ↩' : '✓ Nutzen'}
+              </button>
+              <button onClick={() => onAction(week, 'charter')} style={{
+                flex: '1 1 90px', padding: '8px 4px', borderRadius: 7, fontWeight: 700, fontSize: 12,
+                border: `2px solid ${isCh ? 'var(--blue)' : 'rgba(122,184,212,.4)'}`,
+                background: isCh ? 'var(--blue)' : 'transparent',
+                color: isCh ? 'var(--navy)' : 'var(--blue)'
+              }}>
+                {isCh ? '⛵ Charter ↩' : '⛵ Verchartern'}
+              </button>
+              <button onClick={() => onAction(week, 'swap')} style={{
+                flex: '1 1 80px', padding: '8px 4px', borderRadius: 7, fontWeight: 700, fontSize: 12,
+                border: '2px solid rgba(184,147,42,.5)', background: 'transparent', color: 'var(--gold)'
+              }}>
+                ⇄ Tauschen
+              </button>
+              <button onClick={() => onAction(week, 'sell')} style={{
+                flex: '1 1 120px', padding: '8px 4px', borderRadius: 7, fontWeight: 700, fontSize: 12,
+                border: '2px solid rgba(248,113,113,.4)', background: 'transparent', color: 'var(--red)'
+              }}>
+                💸 Verkaufen ({eur(WP)})
+              </button>
+            </>
+          ) : (
+            <button onClick={() => onAction(week, 'buy')} style={{
+              width: '100%', padding: '9px 0', borderRadius: 7, fontWeight: 700, fontSize: 13,
+              border: `2px solid ${ow.c}77`, background: 'transparent', color: ow.c
+            }}>
+              💰 Woche kaufen · {eur(WP)}
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── SLOT PANEL ────────────────────────────────────────────────────────────────
+function SlotPanel({ slot, slots, reqs, onWeekAction, onClose }) {
+  const ow = O[slot.origOwner];
+  const myCount = slot.weeks.filter(w => w.owner === ME).length;
+  return (
+    <div style={{
+      gridColumn: '1 / -1', background: 'var(--navy-mid)', borderRadius: 12,
+      border: `2px solid ${ow.c}`, boxShadow: `0 8px 40px rgba(0,0,0,.5), 0 0 0 1px ${ow.c}22`,
+      overflow: 'hidden', marginTop: 6, marginBottom: 2
+    }}>
+      <div style={{ background: ow.c + '18', borderBottom: `1px solid ${ow.c}55`, padding: '14px 20px', display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div style={{ flex: 1 }}>
+          <div style={{ color: ow.c, fontWeight: 800, fontSize: 17 }}>
+            {slot.prem ? '★ ' : ''}{slot.label}
+            <span style={{ fontWeight: 400, fontSize: 13, marginLeft: 12, opacity: .6, color: 'var(--cream)' }}>
+              {fmts(slot.start)} – {fmts(slot.end)}
+            </span>
+          </div>
+          <div style={{ color: 'rgba(249,246,240,.5)', fontSize: 12, marginTop: 2 }}>
+            {slot.qual} · {slot.type === 'EU' ? 'Mittelmeer' : 'Karibik'} · {ow.name}
+            {myCount > 0 && <span style={{ marginLeft: 8, fontWeight: 700, color: ow.c }}>· {myCount}/3 Wochen Ihre</span>}
+          </div>
+        </div>
+        <button onClick={onClose} style={{
+          background: 'transparent', border: `1px solid ${ow.c}`,
+          color: ow.c, borderRadius: 20, padding: '8px 20px', fontWeight: 700, fontSize: 13
+        }}>← Zurück</button>
+      </div>
+      <div style={{ padding: '14px 18px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+        {slot.weeks.map(w => (
+          <WeekCard key={w.id} week={w} slots={slots} reqs={reqs}
+            onAction={(w, action) => onWeekAction(w, action)} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── SLOT CARD ─────────────────────────────────────────────────────────────────
+function SlotCard({ slot, reqs, expanded, onToggle }) {
+  const ow   = O[slot.origOwner];
+  const myW  = slot.weeks.filter(w => w.owner === ME).length;
+  const anyP = slot.weeks.some(w => pendingReq(reqs, w.id));
+  const use  = slot.weeks.filter(w => w.owner === ME && w.status === 'use').length;
+  const ch   = slot.weeks.filter(w => w.owner === ME && w.status === 'charter').length;
+  const op   = slot.weeks.filter(w => w.owner === ME && !w.status).length;
+
+  return (
+    <div onClick={onToggle} style={{
+      borderRadius: 10, overflow: 'hidden', cursor: 'pointer',
+      border: `1.5px solid ${expanded ? ow.c : ow.c + '44'}`,
+      background: expanded ? ow.bg : 'var(--navy-card)',
+      boxShadow: expanded
+        ? `0 0 0 2px ${ow.c}44, 0 6px 24px rgba(0,0,0,.4)`
+        : '0 2px 8px rgba(0,0,0,.3)',
+      opacity: myW > 0 ? 1 : .6,
+      userSelect: 'none',
+      transition: 'border-color .2s, box-shadow .2s, opacity .2s'
+    }}>
+      {/* Header strip */}
+      <div style={{ background: ow.c + '28', borderBottom: `1px solid ${ow.c}33`, padding: '9px 12px', display: 'flex', alignItems: 'center', gap: 7 }}>
+        <span style={{ fontWeight: 800, color: ow.c, fontSize: 12, flex: 1 }}>
+          {slot.prem ? '★ ' : ''}{slot.label}
+        </span>
+        {myW > 0 && (
+          <span style={{ background: ow.c + '33', color: ow.c, fontSize: 9, fontWeight: 800, borderRadius: 10, padding: '2px 8px', flexShrink: 0 }}>
+            {myW === 3 ? 'MEIN SLOT' : `${myW}/3 Wochen`}
+          </span>
+        )}
+        <div style={{ display: 'flex', gap: 3, flexShrink: 0 }}>
+          {slot.weeks.map(w => {
+            const p = pendingReq(reqs, w.id);
+            const d = doneReq(reqs, w.id);
+            return (
+              <div key={w.id}
+                title={p ? 'Anfrage läuft' : d ? 'Abgeschlossen' : w.status === 'use' ? 'Genutzt' : w.status === 'charter' ? 'Charter' : 'Offen'}
+                style={{
+                  width: 10, height: 10, borderRadius: 2,
+                  background: p ? 'var(--gold)' : d ? 'var(--purple)'
+                    : w.status === 'use' ? 'var(--green)'
+                    : w.status === 'charter' ? 'var(--blue)'
+                    : w.owner === ME ? 'rgba(249,246,240,.35)' : 'rgba(249,246,240,.1)',
+                  border: '1px solid rgba(249,246,240,.15)'
+                }} />
+            );
+          })}
+        </div>
+        <span style={{ color: ow.c + '88', fontSize: 13, transform: expanded ? 'rotate(90deg)' : 'none', transition: '.2s', marginLeft: 2 }}>▶</span>
+      </div>
+      {/* Body */}
+      <div style={{ padding: '8px 12px' }}>
+        <div style={{ fontWeight: 700, fontSize: 12, color: 'var(--cream)', marginBottom: 1 }}>
+          {fmts(slot.start)} – {fmts(slot.end)}
+        </div>
+        <div style={{ fontSize: 10, color: slot.prem ? 'var(--gold)' : 'rgba(249,246,240,.45)', fontWeight: slot.prem ? 700 : 400, marginBottom: 6 }}>
+          {slot.qual}
+        </div>
+        <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
+          {use  > 0 && <Pill bg="#071507" color="var(--green)">{use}W ✓</Pill>}
+          {ch   > 0 && <Pill bg="#051520" color="var(--blue)">{ch}W ⛵</Pill>}
+          {op   > 0 && <Pill bg={ow.bg}   color={ow.c}>{op}W ○</Pill>}
+          {anyP      && <Pill bg="#1C1505" color="var(--gold)">⏳</Pill>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── SWAP MODAL ────────────────────────────────────────────────────────────────
+function SwapModal({ myWeek, slots, reqs, onSend, onClose }) {
+  const [sel, setSel] = useState(null);
+  const [filter, setFilter] = useState('all');
+
+  const avail = allWeeks(slots).filter(w => {
+    if (w.owner === ME) return false;
+    if (pendingReq(reqs, w.id) || doneReq(reqs, w.id)) return false;
+    return true;
+  }).sort((a, b) => new Date(a.start) - new Date(b.start));
+
+  const shown = filter === 'all' ? avail : avail.filter(w => w.type === filter);
+
+  return (
+    <div className="modal-bg" onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="modal">
+        <div style={{ background: 'linear-gradient(135deg, var(--gold) 0%, #8a6a1a 100%)', padding: '18px 24px', borderRadius: '12px 12px 0 0', display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ flex: 1, color: 'var(--navy)' }}>
+            <div style={{ fontWeight: 800, fontSize: 17 }}>Woche tauschen</div>
+            <div style={{ fontSize: 12, opacity: .8, marginTop: 2 }}>
+              Ich biete: <b>{myWeek.slotShort} · W{myWeek.wn}</b> &nbsp; {fmt(myWeek.start)} – {fmt(myWeek.end)}
+            </div>
+          </div>
+          <button onClick={onClose} style={{ background: 'rgba(0,0,0,.2)', border: 'none', color: 'var(--navy)', borderRadius: 20, padding: '6px 16px', fontWeight: 700, fontSize: 13 }}>✕</button>
+        </div>
+
+        <div style={{ padding: '20px 24px' }}>
+          {/* My week */}
+          <div style={{ background: O[ME].bg, border: `2px solid ${O[ME].c}`, borderRadius: 10, padding: '10px 16px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ background: O[ME].c, color: 'var(--navy)', borderRadius: '50%', width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 15 }}>{ME}</div>
+            <div>
+              <div style={{ fontSize: 10, color: O[ME].c, fontWeight: 700 }}>ICH BIETE AN</div>
+              <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--cream)' }}>
+                {myWeek.slotShort} · W{myWeek.wn}
+                {myWeek.isPremium && <span style={{ color: 'var(--gold)', marginLeft: 6, fontSize: 12 }}>★</span>}
+              </div>
+              <div style={{ fontSize: 12, color: 'rgba(249,246,240,.5)' }}>{fmt(myWeek.start)} – {fmt(myWeek.end)} · {myWeek.type === 'EU' ? 'Mittelmeer' : 'Karibik'}</div>
+            </div>
+          </div>
+
+          {/* Filter */}
+          <div style={{ display: 'flex', gap: 6, marginBottom: 12, alignItems: 'center' }}>
+            <span style={{ fontSize: 12, color: 'rgba(249,246,240,.4)', marginRight: 4 }}>Zeige:</span>
+            {[['all','Alle'],['EU','Mittelmeer'],['KAR','Karibik']].map(([k, l]) => (
+              <button key={k} onClick={() => setFilter(k)} style={{
+                padding: '4px 12px', borderRadius: 20,
+                border: `2px solid ${filter === k ? 'var(--gold)' : 'rgba(249,246,240,.15)'}`,
+                background: filter === k ? 'var(--gold)' : 'transparent',
+                color: filter === k ? 'var(--navy)' : 'rgba(249,246,240,.55)',
+                fontWeight: 700, fontSize: 12
+              }}>{l}</button>
+            ))}
+            <span style={{ fontSize: 11, color: 'rgba(249,246,240,.25)', marginLeft: 'auto' }}>{shown.length} verfügbar</span>
+          </div>
+
+          {/* Week list */}
+          <div style={{ border: '1px solid rgba(249,246,240,.1)', borderRadius: 10, maxHeight: 300, overflowY: 'auto', marginBottom: 14 }}>
+            {shown.length === 0
+              ? <div style={{ padding: 20, textAlign: 'center', color: 'rgba(249,246,240,.35)', fontSize: 13 }}>Keine Wochen verfügbar</div>
+              : shown.map((w, i) => {
+                const ow = O[w.owner];
+                const isSel = sel?.id === w.id;
+                return (
+                  <div key={w.id} onClick={() => setSel(isSel ? null : w)} style={{
+                    display: 'flex', alignItems: 'center', gap: 12,
+                    padding: '11px 14px', cursor: 'pointer',
+                    background: isSel ? ow.bg : i % 2 === 0 ? 'rgba(255,255,255,.025)' : 'transparent',
+                    borderBottom: '1px solid rgba(249,246,240,.06)',
+                    borderLeft: `4px solid ${isSel ? ow.c : 'transparent'}`
+                  }}>
+                    <div style={{ width: 10, height: 10, borderRadius: '50%', background: ow.c, flexShrink: 0 }} />
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--cream)' }}>{fmt(w.start)} – {fmt(w.end)}</div>
+                      <div style={{ fontSize: 11, color: 'rgba(249,246,240,.45)', marginTop: 1 }}>
+                        {w.slotShort} · W{w.wn} · {w.type === 'EU' ? 'Mittelmeer' : 'Karibik'}
+                        {w.isPremium && <span style={{ color: 'var(--gold)', fontWeight: 700, marginLeft: 6 }}>★</span>}
+                      </div>
+                    </div>
+                    <div style={{ fontWeight: 700, fontSize: 12, color: ow.c, flexShrink: 0 }}>{ow.name}</div>
+                    {isSel && <div style={{ background: ow.c, color: 'var(--navy)', borderRadius: '50%', width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 12 }}>✓</div>}
+                  </div>
+                );
+              })
+            }
+          </div>
+
+          {/* Send or placeholder */}
+          {sel ? (
+            <div style={{ background: O[sel.owner].bg, border: `2px solid ${O[sel.owner].c}`, borderRadius: 10, padding: '12px 16px' }}>
+              <div style={{ fontSize: 10, color: O[sel.owner].c, fontWeight: 700, marginBottom: 4 }}>ICH MÖCHTE ERHALTEN</div>
+              <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--cream)', marginBottom: 10 }}>
+                {sel.slotShort} · W{sel.wn} · {fmt(sel.start)} – {fmt(sel.end)}
+                <span style={{ marginLeft: 8, fontWeight: 700, color: O[sel.owner].c, fontSize: 12 }}>von {O[sel.owner].name}</span>
+              </div>
+              <button onClick={() => { onSend(myWeek, sel); onClose(); }}
+                style={{ width: '100%', padding: 12, borderRadius: 8, border: 'none', background: 'var(--gold)', color: 'var(--navy)', fontWeight: 800, fontSize: 15, cursor: 'pointer' }}>
+                Tausch-Anfrage absenden →
+              </button>
+            </div>
+          ) : (
+            <div style={{ padding: '10px 14px', background: 'rgba(249,246,240,.04)', borderRadius: 10, fontSize: 12, color: 'rgba(249,246,240,.3)', textAlign: 'center' }}>
+              ↑ Woche aus der Liste auswählen
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── BUY MODAL ─────────────────────────────────────────────────────────────────
+function BuyModal({ week, onSend, onClose }) {
+  const [ok, setOk] = useState(false);
+  const ow = O[week.owner];
+  return (
+    <div className="modal-bg" onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="modal" style={{ maxWidth: 440 }}>
+        <div style={{ background: ow.c + '22', borderBottom: `1px solid ${ow.c}`, padding: '16px 22px', borderRadius: '12px 12px 0 0' }}>
+          <div style={{ color: ow.c, fontWeight: 800, fontSize: 17 }}>Woche kaufen</div>
+          <div style={{ color: 'rgba(249,246,240,.55)', fontSize: 12, marginTop: 2 }}>{week.slotShort} · W{week.wn} · {fmt(week.start)} – {fmt(week.end)}</div>
+        </div>
+        <div style={{ padding: '22px 24px' }}>
+          <div className="grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 18 }}>
+            <div style={{ background: ow.bg, border: `2px solid ${ow.c}`, borderRadius: 10, padding: 14 }}>
+              <div style={{ fontSize: 10, color: ow.c, fontWeight: 700, marginBottom: 6 }}>SIE KAUFEN</div>
+              <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--cream)' }}>{week.slotShort} · W{week.wn}</div>
+              <div style={{ fontSize: 12, color: 'rgba(249,246,240,.5)', marginTop: 2 }}>{fmt(week.start)}</div>
+              <div style={{ fontSize: 12, color: 'rgba(249,246,240,.5)' }}>bis {fmt(week.end)}</div>
+              <div style={{ fontSize: 11, color: ow.c, fontWeight: 700, marginTop: 6 }}>von {ow.name}</div>
+            </div>
+            <div style={{ background: '#051507', border: '2px solid var(--green)', borderRadius: 10, padding: 14 }}>
+              <div style={{ fontSize: 10, color: 'var(--green)', fontWeight: 700, marginBottom: 6 }}>KAUFPREIS</div>
+              <div style={{ fontSize: 28, fontWeight: 800, color: 'var(--green)' }}>{eur(WP)}</div>
+              <div style={{ fontSize: 11, color: 'rgba(249,246,240,.4)', marginTop: 4 }}>Festpreis</div>
+            </div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18, padding: '10px 14px', background: 'rgba(184,147,42,.08)', border: '1px solid rgba(184,147,42,.3)', borderRadius: 8, cursor: 'pointer' }}
+            onClick={() => setOk(v => !v)}>
+            <input type="checkbox" checked={ok} onChange={e => setOk(e.target.checked)} style={{ width: 18, height: 18, cursor: 'pointer', accentColor: 'var(--gold)' }} />
+            <label style={{ fontSize: 12, color: 'var(--gold)', cursor: 'pointer', fontWeight: 600 }}>Ich bestätige die Kauf-Anfrage für {eur(WP)}.</label>
+          </div>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button disabled={!ok} onClick={() => { onSend(week); onClose(); }}
+              style={{ flex: 1, padding: 11, borderRadius: 8, border: 'none', background: ok ? 'var(--gold)' : 'rgba(255,255,255,.08)', color: ok ? 'var(--navy)' : 'rgba(249,246,240,.25)', fontWeight: 700, fontSize: 13 }}>
+              Anfrage absenden →
+            </button>
+            <button onClick={onClose} style={{ padding: '11px 20px', borderRadius: 8, border: '1px solid rgba(249,246,240,.15)', background: 'transparent', color: 'rgba(249,246,240,.55)', fontWeight: 700, fontSize: 13 }}>
+              Abbrechen
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── SELL MODAL ────────────────────────────────────────────────────────────────
+function SellModal({ week, onSend, onClose }) {
+  const [sel, setSel] = useState(null);
+  const others = ['A','B','C'].filter(o => o !== ME);
+  return (
+    <div className="modal-bg" onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="modal" style={{ maxWidth: 440 }}>
+        <div style={{ background: 'rgba(248,113,113,.12)', borderBottom: '1px solid rgba(248,113,113,.4)', padding: '16px 22px', borderRadius: '12px 12px 0 0' }}>
+          <div style={{ color: 'var(--red)', fontWeight: 800, fontSize: 17 }}>Woche verkaufen</div>
+          <div style={{ color: 'rgba(249,246,240,.55)', fontSize: 12, marginTop: 2 }}>{week.slotShort} · W{week.wn} · {fmt(week.start)} – {fmt(week.end)}</div>
+        </div>
+        <div style={{ padding: '22px 24px' }}>
+          <div style={{ fontSize: 13, color: 'var(--cream)', marginBottom: 16 }}>
+            Preis: <b style={{ color: 'var(--gold)' }}>{eur(WP)}</b>. An wen soll das Angebot?
+          </div>
+          <div className="grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 20 }}>
+            {others.map(ow => {
+              const o = O[ow];
+              const isSel = sel === ow;
+              return (
+                <div key={ow} onClick={() => setSel(isSel ? null : ow)} style={{
+                  border: `2px solid ${isSel ? o.c : 'rgba(249,246,240,.15)'}`,
+                  borderRadius: 12, padding: 16, cursor: 'pointer',
+                  background: isSel ? o.bg : 'var(--navy)', textAlign: 'center',
+                  transition: 'border-color .15s, background .15s'
+                }}>
+                  <div style={{ fontWeight: 800, fontSize: 24, color: o.c, marginBottom: 3 }}>{ow}</div>
+                  <div style={{ fontWeight: 600, fontSize: 13, color: 'var(--cream)' }}>{o.name}</div>
+                  <div style={{ fontSize: 11, color: 'rgba(249,246,240,.4)', marginTop: 4 }}>erhält {eur(WP)} Angebot</div>
+                  {isSel && <div style={{ color: o.c, fontWeight: 800, fontSize: 18, marginTop: 4 }}>✓</div>}
+                </div>
+              );
+            })}
+          </div>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button disabled={!sel} onClick={() => { onSend(week, sel); onClose(); }}
+              style={{ flex: 1, padding: 11, borderRadius: 8, border: 'none', background: sel ? 'var(--red)' : 'rgba(255,255,255,.08)', color: sel ? '#fff' : 'rgba(249,246,240,.25)', fontWeight: 700, fontSize: 13 }}>
+              Angebot senden →
+            </button>
+            <button onClick={onClose} style={{ padding: '11px 20px', borderRadius: 8, border: '1px solid rgba(249,246,240,.15)', background: 'transparent', color: 'rgba(249,246,240,.55)', fontWeight: 700, fontSize: 13 }}>
+              Abbrechen
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── STATS TABLE ───────────────────────────────────────────────────────────────
+function Tabelle({ slots, reqs }) {
+  const calcYear = yr => {
+    const ws = yr === 'all'
+      ? allWeeks(slots).filter(w => w.owner === ME)
+      : allWeeks(slots).filter(w => w.owner === ME && w.yr === yr);
+    let use = 0, ch = 0, sw = 0, pu = 0, sold = 0, op = 0;
+    ws.forEach(w => {
+      const d = doneReq(reqs, w.id);
+      if (d) { if (d.type === 'swap') sw++; else if (d.type === 'buy') pu++; else sold++; return; }
+      if (w.status === 'use') use++;
+      else if (w.status === 'charter') ch++;
+      else op++;
+    });
+    return { use, ch, sw, pu, sold, op, tot: use + ch + sw + pu + op, rev: ch * CR * .65 };
+  };
+
+  const rows = [
+    { l: 'Jahr 1', sub: `EU ${YEAR0} / KAR ${YEAR0}–${YEAR0+1}`, d: calcYear(1) },
+    { l: 'Jahr 2', sub: `EU ${YEAR0+1} / KAR ${YEAR0+1}–${YEAR0+2}`, d: calcYear(2) },
+    { l: 'Jahr 3', sub: `EU ${YEAR0+2} / KAR ${YEAR0+2}–${YEAR0+3}`, d: calcYear(3) },
+    { l: 'Gesamt', sub: '36 Wochen', d: calcYear('all'), tot: true },
+  ];
+  const cols = [
+    { k: 'use',  l: '✓ Genutzt',    bg: '#071507', c: 'var(--green)' },
+    { k: 'ch',   l: '⛵ Charter',   bg: '#051520', c: 'var(--blue)' },
+    { k: 'sw',   l: '⇄ Getauscht', bg: '#120A30', c: 'var(--purple)' },
+    { k: 'pu',   l: '💰 Zugekauft', bg: '#1C1505', c: 'var(--gold)' },
+    { k: 'sold', l: '💸 Verkauft',  bg: '#200A0A', c: 'var(--red)' },
+    { k: 'op',   l: '○ Offen',     bg: 'rgba(249,246,240,.04)', c: 'rgba(249,246,240,.35)' },
+    { k: 'tot',  l: 'Σ Total',     bg: 'rgba(249,246,240,.07)', c: 'var(--cream)' },
+    { k: 'rev',  l: 'Charter-Erlös', bg: '#051520', c: 'var(--blue)', money: true },
+  ];
+
+  return (
+    <div style={{ background: 'var(--navy-mid)', borderRadius: 12, padding: '16px 18px', border: '1px solid rgba(184,147,42,.2)', marginBottom: 20 }}>
+      <div style={{ fontWeight: 800, fontSize: 14, color: 'var(--gold)', marginBottom: 12, paddingBottom: 10, borderBottom: '1px solid rgba(184,147,42,.2)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        📊 Meine Wochen-Auswertung
+        <span style={{ fontSize: 11, color: 'rgba(249,246,240,.3)', fontWeight: 400 }}>{O[ME].name} · 36 Wochen total</span>
+      </div>
+      <div className="stats-scroll">
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+          <thead>
+            <tr style={{ background: 'rgba(249,246,240,.03)' }}>
+              <th style={{ textAlign: 'left', padding: '7px 10px', fontWeight: 700, color: 'rgba(249,246,240,.35)', fontSize: 11, minWidth: 160 }}>Zeitraum</th>
+              {cols.map(c => <th key={c.k} style={{ textAlign: 'center', padding: '7px 8px', fontWeight: 700, color: c.c, fontSize: 11, whiteSpace: 'nowrap', minWidth: 65 }}>{c.l}</th>)}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r, i) => (
+              <tr key={i} style={{ background: r.tot ? 'rgba(184,147,42,.06)' : 'transparent', borderTop: r.tot ? '1.5px solid rgba(184,147,42,.3)' : '1px solid rgba(249,246,240,.05)' }}>
+                <td style={{ padding: '9px 10px', fontWeight: r.tot ? 800 : 600, color: r.tot ? 'var(--gold)' : 'var(--cream)' }}>
+                  {r.l}<div style={{ fontSize: 10, color: 'rgba(249,246,240,.3)', fontWeight: 400 }}>{r.sub}</div>
+                </td>
+                {cols.map(c => {
+                  const v = r.d[c.k];
+                  const disp = c.money ? (v > 0 ? eur(v) : '—') : (v > 0 ? `${v}W` : '—');
+                  return (
+                    <td key={c.k} style={{ textAlign: 'center', padding: '7px 8px' }}>
+                      {v > 0
+                        ? <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 6, background: c.bg, color: c.c, fontWeight: r.tot ? 800 : 700, fontSize: r.tot ? 13 : 11 }}>{disp}</span>
+                        : <span style={{ color: 'rgba(249,246,240,.12)' }}>—</span>}
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+// ── INBOX ─────────────────────────────────────────────────────────────────────
+function Inbox({ reqs, slots, onAccept, onDecline }) {
+  const pend = reqs.filter(r => r.toOwner === ME && r.status === 'pending');
+  if (!pend.length) return null;
+  const fw = allWeeks(slots);
+  return (
+    <div style={{ background: 'rgba(184,147,42,.07)', border: '2px solid var(--gold)', borderRadius: 12, padding: '16px 18px', marginBottom: 20 }}>
+      <div style={{ fontWeight: 800, color: 'var(--gold)', fontSize: 14, marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
+        ⏳ Ausstehende Anfragen ({pend.length})
+        <span style={{ fontSize: 11, color: 'rgba(184,147,42,.55)', fontWeight: 400, marginLeft: 'auto' }}>{O[ME].name} antwortet</span>
+      </div>
+      {pend.map(req => {
+        const myW = req.myWid  ? fw.find(w => w.id === req.myWid)    : null;
+        const thW = req.theirWid ? fw.find(w => w.id === req.theirWid) : null;
+        const tgW = req.tgtWid  ? fw.find(w => w.id === req.tgtWid)   : null;
+        const fromO = O[req.fromOwner];
+
+        return (
+          <div key={req.id} style={{ background: 'var(--navy)', border: '1px solid rgba(184,147,42,.25)', borderRadius: 10, padding: '12px 14px', marginBottom: 10 }}>
+            <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--cream)', marginBottom: 10 }}>
+              {req.type === 'swap' && thW  && `⇄ Tausch-Anfrage von ${fromO.name}`}
+              {req.type === 'buy'  && tgW  && `💰 Kauf-Anfrage von ${fromO.name} für Ihre Woche`}
+              {req.type === 'sell' && myW  && `💸 Verkaufsangebot von ${fromO.name}`}
+            </div>
+
+            {req.type === 'swap' && myW && thW && (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 40px 1fr', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+                <div style={{ background: fromO.bg, border: `1px solid ${fromO.c}`, borderRadius: 8, padding: '8px 10px' }}>
+                  <div style={{ fontSize: 10, color: fromO.c, fontWeight: 700 }}>VON {fromO.name.toUpperCase()}</div>
+                  <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--cream)' }}>{myW.slotShort} · W{myW.wn}</div>
+                  <div style={{ fontSize: 11, color: 'rgba(249,246,240,.45)' }}>{fmt(myW.start)}</div>
+                </div>
+                <div style={{ textAlign: 'center', fontSize: 20, color: 'var(--gold)' }}>⇄</div>
+                <div style={{ background: O[ME].bg, border: `1px solid ${O[ME].c}`, borderRadius: 8, padding: '8px 10px' }}>
+                  <div style={{ fontSize: 10, color: O[ME].c, fontWeight: 700 }}>SIE GEBEN</div>
+                  <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--cream)' }}>{thW.slotShort} · W{thW.wn}</div>
+                  <div style={{ fontSize: 11, color: 'rgba(249,246,240,.45)' }}>{fmt(thW.start)}</div>
+                </div>
+              </div>
+            )}
+
+            {req.type === 'buy' && tgW && (
+              <div className="grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
+                <div style={{ background: O[ME].bg, border: `1px solid ${O[ME].c}`, borderRadius: 8, padding: '8px 10px' }}>
+                  <div style={{ fontSize: 10, color: O[ME].c, fontWeight: 700 }}>IHRE WOCHE</div>
+                  <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--cream)' }}>{tgW.slotShort} · W{tgW.wn}</div>
+                  <div style={{ fontSize: 11, color: 'rgba(249,246,240,.45)' }}>{fmt(tgW.start)} – {fmt(tgW.end)}</div>
+                </div>
+                <div style={{ background: '#051507', border: '1px solid var(--green)', borderRadius: 8, padding: '8px 10px' }}>
+                  <div style={{ fontSize: 10, color: 'var(--green)', fontWeight: 700 }}>SIE ERHALTEN</div>
+                  <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--green)' }}>{eur(WP)}</div>
+                </div>
+              </div>
+            )}
+
+            {req.type === 'sell' && myW && (
+              <div className="grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
+                <div style={{ background: fromO.bg, border: `1px solid ${fromO.c}`, borderRadius: 8, padding: '8px 10px' }}>
+                  <div style={{ fontSize: 10, color: fromO.c, fontWeight: 700 }}>ANGEBOT VON {fromO.name.toUpperCase()}</div>
+                  <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--cream)' }}>{myW.slotShort} · W{myW.wn}</div>
+                  <div style={{ fontSize: 11, color: 'rgba(249,246,240,.45)' }}>{fmt(myW.start)} – {fmt(myW.end)}</div>
+                </div>
+                <div style={{ background: '#051507', border: '1px solid var(--green)', borderRadius: 8, padding: '8px 10px' }}>
+                  <div style={{ fontSize: 10, color: 'var(--green)', fontWeight: 700 }}>SIE ZAHLEN</div>
+                  <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--green)' }}>{eur(WP)}</div>
+                </div>
+              </div>
+            )}
+
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <button onClick={() => onAccept(req)} style={{ padding: '8px 18px', borderRadius: 7, border: 'none', background: 'var(--green)', color: 'var(--navy)', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>
+                ✓ Annehmen
+              </button>
+              <button onClick={() => onDecline(req)} style={{ padding: '8px 18px', borderRadius: 7, border: '1px solid rgba(248,113,113,.5)', background: 'transparent', color: 'var(--red)', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>
+                ✕ Ablehnen
+              </button>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ── TRANSACTION LOG ───────────────────────────────────────────────────────────
+function TxLog({ reqs, slots }) {
+  const done2 = reqs.filter(r => r.status !== 'pending');
+  if (!done2.length) return null;
+  const fw = allWeeks(slots);
+  return (
+    <div style={{ background: 'var(--navy-mid)', borderRadius: 10, padding: '12px 16px', border: '1px solid rgba(249,246,240,.07)', marginBottom: 20 }}>
+      <div style={{ fontWeight: 800, fontSize: 13, color: 'var(--cream)', marginBottom: 8, paddingBottom: 8, borderBottom: '1px solid rgba(249,246,240,.07)' }}>
+        📋 Transaktions-Verlauf
+      </div>
+      {done2.map((r, i) => {
+        const ok   = r.status === 'accepted';
+        const myW  = r.myWid    ? fw.find(w => w.id === r.myWid)    : null;
+        const thW  = r.theirWid ? fw.find(w => w.id === r.theirWid) : null;
+        const tgW  = r.tgtWid   ? fw.find(w => w.id === r.tgtWid)   : null;
+        const toO  = r.toOwner  ? O[r.toOwner]                       : null;
+        const tl   = r.type === 'swap' ? 'Tausch' : r.type === 'buy' ? 'Kauf' : 'Verkauf';
+        let txt = '';
+        if (r.type === 'swap' && myW && thW) txt = `${myW.slotShort} W${myW.wn} ⇄ ${O[r.toOwner]?.name || r.toOwner} ${thW.slotShort} W${thW.wn}`;
+        if (r.type === 'buy'  && tgW)        txt = `${tgW.slotShort} W${tgW.wn} · ${eur(WP)}`;
+        if (r.type === 'sell' && myW && toO) txt = `${myW.slotShort} W${myW.wn} an ${toO.name} · ${eur(WP)}`;
+        return (
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0', borderBottom: '1px solid rgba(249,246,240,.05)' }}>
+            <Pill bg={ok ? '#071507' : '#200A0A'} color={ok ? 'var(--green)' : 'var(--red)'}>
+              {ok ? `✓ ${tl}` : `✕ ${tl} abgelehnt`}
+            </Pill>
+            <span style={{ fontSize: 12, color: 'rgba(249,246,240,.5)' }}>{txt}</span>
+            <span style={{ fontSize: 10, color: 'rgba(249,246,240,.2)', marginLeft: 'auto' }}>{r.fromOwner}→{r.toOwner}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ── OVERVIEW ──────────────────────────────────────────────────────────────────
+function Overview({ slots }) {
+  return (
+    <div>
+      {[1,2,3].map(y => {
+        const ey = YEAR0 + y - 1;
+        return (
+          <div key={y} style={{ background: 'var(--navy-mid)', borderRadius: 12, padding: '16px 18px', border: '1px solid rgba(184,147,42,.15)', marginBottom: 20 }}>
+            <div style={{ fontWeight: 800, fontSize: 15, color: 'var(--gold)', marginBottom: 14, paddingBottom: 10, borderBottom: '1px solid rgba(184,147,42,.15)', display: 'flex', justifyContent: 'space-between' }}>
+              📅 Jahr {y}
+              <span style={{ fontSize: 12, color: 'rgba(249,246,240,.3)', fontWeight: 400 }}>EU {ey} · Karibik {ey}–{ey+1}</span>
+            </div>
+            <div className="grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 14 }}>
+              {['A','B','C'].map(ow => {
+                const o    = O[ow];
+                const myW  = allWeeks(slots).filter(w => w.owner === ow && w.yr === y);
+                const use  = myW.filter(w => w.status === 'use').length;
+                const ch   = myW.filter(w => w.status === 'charter').length;
+                const op   = myW.filter(w => !w.status).length;
+                const mySl = slots.filter(s => s.yr === y && s.origOwner === ow);
+                return (
+                  <div key={ow} style={{ border: `1.5px solid ${o.c}33`, borderRadius: 10, overflow: 'hidden' }}>
+                    <div style={{ background: o.c + '1A', borderBottom: `1px solid ${o.c}44`, padding: '9px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ color: o.c, fontWeight: 800, fontSize: 14 }}>{o.name}</span>
+                      <span style={{ background: o.c + '33', color: o.c, borderRadius: 20, padding: '1px 9px', fontSize: 11, fontWeight: 700 }}>{myW.length}W</span>
+                    </div>
+                    <div style={{ padding: '10px 12px' }}>
+                      {['EU','KAR'].map(type => (
+                        <div key={type} style={{ marginBottom: 8 }}>
+                          <div style={{ fontSize: 10, fontWeight: 700, marginBottom: 4, color: type === 'EU' ? 'var(--green)' : 'var(--blue)', display: 'flex', alignItems: 'center', gap: 3 }}>
+                            <div style={{ width: 6, height: 6, borderRadius: '50%', background: type === 'EU' ? 'var(--green)' : 'var(--blue)' }} />
+                            {type === 'EU' ? 'Mittelmeer' : 'Karibik'}
+                          </div>
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
+                            {mySl.filter(s => s.type === type).map(sl => (
+                              <div key={sl.id} style={{ background: o.bg, borderRadius: 5, padding: '3px 7px', border: `1px solid ${o.c}22` }}>
+                                <div style={{ fontWeight: 700, fontSize: 9, color: o.c }}>{sl.prem ? '★ ' : ''}{sl.slabel}</div>
+                                <div style={{ display: 'flex', gap: 2, marginTop: 1 }}>
+                                  {sl.weeks.map(w => (
+                                    <div key={w.id} title={`W${w.wn}: ${w.status || 'offen'}`}
+                                      style={{ width: 7, height: 7, borderRadius: 1, background: w.status === 'use' ? 'var(--green)' : w.status === 'charter' ? 'var(--blue)' : 'rgba(249,246,240,.12)' }} />
+                                  ))}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                      <div style={{ background: 'rgba(249,246,240,.03)', borderRadius: 7, padding: '6px 8px', display: 'flex', gap: 8, marginTop: 4, flexWrap: 'wrap' }}>
+                        {[['✓', use, 'var(--green)'], ['⛵', ch, 'var(--blue)'], ['○', op, 'rgba(249,246,240,.3)']].map(([l, v, c]) => (
+                          <div key={l} style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+                            <span style={{ fontSize: 10, color: 'rgba(249,246,240,.35)' }}>{l}</span>
+                            <span style={{ fontSize: 10, fontWeight: 700, color: c }}>{v}W</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ── HEADER ────────────────────────────────────────────────────────────────────
+function Header({ pendingCount, onReset }) {
+  return (
+    <div style={{
+      background: 'linear-gradient(135deg, #0A1830 0%, var(--navy-mid) 100%)',
+      borderBottom: '1px solid rgba(184,147,42,.35)',
+      padding: '14px 24px',
+      boxShadow: '0 4px 32px rgba(0,0,0,.5)',
+      position: 'sticky', top: 0, zIndex: 50
+    }}>
+      <div style={{ maxWidth: 1060, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+        <div>
+          <div style={{ color: 'var(--gold)', fontWeight: 800, fontSize: 9, letterSpacing: 3, marginBottom: 3, opacity: .8 }}>
+            PRIVATE YACHT CLUB · NUTZUNGSPLANER
+          </div>
+          <h1 style={{ color: 'var(--cream)', fontSize: 18, fontWeight: 800, margin: 0 }}>Explorer Yacht · 50m</h1>
+          <div style={{ color: 'rgba(249,246,240,.35)', fontSize: 10, marginTop: 2 }}>Montenegro · Mittelmeer & Karibik</div>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+          <button onClick={onReset} style={{
+            padding: '6px 14px', borderRadius: 6,
+            border: '1px solid rgba(184,147,42,.25)', background: 'transparent',
+            color: 'rgba(249,246,240,.4)', fontSize: 11, fontWeight: 600
+          }}>↺ Reset Demo</button>
+          <div style={{ display: 'flex', gap: 5 }}>
+            {['A','B','C'].map(o => {
+              const active = ME === o;
+              const ow = O[o];
+              const cnt = active ? pendingCount : 0;
+              return (
+                <a key={o} href={`?owner=${o}`} style={{
+                  display: 'flex', alignItems: 'center', gap: 5,
+                  padding: '7px 16px', borderRadius: 20,
+                  border: `2px solid ${active ? ow.c : 'rgba(249,246,240,.12)'}`,
+                  background: active ? ow.c + '20' : 'transparent',
+                  color: active ? ow.c : 'rgba(249,246,240,.4)',
+                  fontWeight: 700, fontSize: 13, position: 'relative'
+                }}>
+                  {o}
+                  {cnt > 0 && (
+                    <span style={{
+                      background: 'var(--gold)', color: 'var(--navy)',
+                      borderRadius: '50%', width: 18, height: 18,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: 10, fontWeight: 900
+                    }}>{cnt}</span>
+                  )}
+                </a>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── APP ───────────────────────────────────────────────────────────────────────
+function App() {
+  const [weeks,    setWeeks]    = useState([]);
+  const [requests, setRequests] = useState([]);
+  const [expanded, setExp]      = useState(null);
+  const [tab,      setTab]      = useState('cal');
+  const [yr,       setYr]       = useState('all');
+  const [swapM,    setSwapM]    = useState(null);
+  const [buyM,     setBuyM]     = useState(null);
+  const [sellM,    setSellM]    = useState(null);
+  const [toast,    setToast]    = useState(null);
+  const pollRef = useRef(null);
+
+  const modalOpen = !!(swapM || buyM || sellM);
+
+  const fetchState = useCallback(async () => {
+    try {
+      const r = await fetch('/api/state');
+      const d = await r.json();
+      setWeeks(d.weeks   || []);
+      setRequests(d.requests || []);
+    } catch (e) { console.error('Poll failed', e); }
+  }, []);
+
+  // Initial load + 3s polling
+  useEffect(() => {
+    fetchState();
+    pollRef.current = setInterval(fetchState, 3000);
+    return () => clearInterval(pollRef.current);
+  }, [fetchState]);
+
+  // Pause polling while modal is open
+  useEffect(() => {
+    clearInterval(pollRef.current);
+    if (!modalOpen) {
+      pollRef.current = setInterval(fetchState, 3000);
+    }
+    return () => clearInterval(pollRef.current);
+  }, [modalOpen, fetchState]);
+
+  const notify = (msg, borderColor = 'var(--gold)') => {
+    setToast({ msg, borderColor });
+    setTimeout(() => setToast(null), 3500);
+  };
+
+  // ── Action handlers ──────────────────────────────────────────────────────
+  const handleWeek = async (week, action) => {
+    if (action === 'swap') { setSwapM({ week }); return; }
+    if (action === 'buy')  { setBuyM({ week });  return; }
+    if (action === 'sell') { setSellM({ week }); return; }
+    const r = await fetch(`/api/weeks/${week.id}/status`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ owner: ME, status: week.status === action ? null : action })
+    });
+    const d = await r.json();
+    if (!d.ok) { notify('Fehler: ' + d.error, 'var(--red)'); return; }
+    await fetchState();
+    notify(action === 'use' ? '✓ Als eigene Nutzung markiert' : '⛵ Für Charter freigegeben');
+  };
+
+  const sendSwap = async (myW, thW) => {
+    const r = await fetch('/api/requests', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'swap', fromOwner: ME, myWid: myW.id, theirWid: thW.id })
+    });
+    const d = await r.json();
+    if (!d.ok) { notify('Fehler: ' + d.error, 'var(--red)'); return; }
+    await fetchState();
+    notify(`⇄ Tausch-Anfrage an ${O[thW.owner].name} gesendet`);
+  };
+
+  const sendBuy = async (tgW) => {
+    const r = await fetch('/api/requests', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'buy', fromOwner: ME, tgtWid: tgW.id })
+    });
+    const d = await r.json();
+    if (!d.ok) { notify('Fehler: ' + d.error, 'var(--red)'); return; }
+    await fetchState();
+    notify(`💰 Kauf-Anfrage an ${O[tgW.owner].name} gesendet`);
+  };
+
+  const sendSell = async (myW, toOwner) => {
+    const r = await fetch('/api/requests', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'sell', fromOwner: ME, toOwner, myWid: myW.id })
+    });
+    const d = await r.json();
+    if (!d.ok) { notify('Fehler: ' + d.error, 'var(--red)'); return; }
+    await fetchState();
+    notify(`💸 Verkaufsangebot an ${O[toOwner].name} gesendet`);
+  };
+
+  const acceptReq = async (req) => {
+    const r = await fetch(`/api/requests/${req.id}/respond`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ owner: ME, decision: 'accepted' })
+    });
+    const d = await r.json();
+    if (!d.ok) { notify('Fehler: ' + d.error, 'var(--red)'); return; }
+    await fetchState();
+    notify('✓ Anfrage angenommen', 'var(--green)');
+  };
+
+  const declineReq = async (req) => {
+    const r = await fetch(`/api/requests/${req.id}/respond`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ owner: ME, decision: 'declined' })
+    });
+    const d = await r.json();
+    if (!d.ok) { notify('Fehler: ' + d.error, 'var(--red)'); return; }
+    await fetchState();
+    notify('✕ Anfrage abgelehnt', 'var(--red)');
+  };
+
+  const slots       = buildSlots(weeks);
+  const pendingCount = requests.filter(r => r.toOwner === ME && r.status === 'pending').length;
+  const years        = yr === 'all' ? [1,2,3] : [parseInt(yr)];
+
+  if (!weeks.length) {
+    return (
+      <div style={{ color: 'var(--gold)', padding: 60, textAlign: 'center', fontSize: 16, letterSpacing: 2 }}>
+        LÄDT…
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ minHeight: '100vh', background: 'var(--navy)' }}>
+      {/* Toast */}
+      {toast && (
+        <div className="toast" style={{ borderLeftColor: toast.borderColor }}>{toast.msg}</div>
+      )}
+
+      {/* Modals */}
+      {swapM && <SwapModal myWeek={swapM.week} slots={slots} reqs={requests}
+        onSend={sendSwap} onClose={() => setSwapM(null)} />}
+      {buyM  && <BuyModal  week={buyM.week}
+        onSend={sendBuy}  onClose={() => setBuyM(null)} />}
+      {sellM && <SellModal week={sellM.week}
+        onSend={sendSell} onClose={() => setSellM(null)} />}
+
+      {/* Header */}
+      <Header pendingCount={pendingCount} onReset={async () => {
+        await fetch('/api/reset', { method: 'POST' });
+        await fetchState();
+        setExp(null);
+        notify('↺ Demo-Zustand wiederhergestellt');
+      }} />
+
+      <div style={{ maxWidth: 1060, margin: '0 auto', padding: '0 20px 60px' }}>
+        <div style={{ color: 'rgba(249,246,240,.3)', fontSize: 11, padding: '10px 0 18px', textAlign: 'center' }}>
+          Aktiver Eigentümer: <b style={{ color: 'var(--gold)' }}>{O[ME].name}</b> · Live-Sync alle 3 Sek.
+        </div>
+
+        <Tabelle slots={slots} reqs={requests} />
+        <Inbox reqs={requests} slots={slots} onAccept={acceptReq} onDecline={declineReq} />
+        <TxLog reqs={requests} slots={slots} />
+
+        {/* Charter summary */}
+        {(() => {
+          const cw = allWeeks(slots).filter(w => w.owner === ME && w.status === 'charter');
+          if (!cw.length) return null;
+          return (
+            <div style={{ background: 'var(--navy-mid)', borderRadius: 10, padding: '12px 16px', border: '1px solid rgba(122,184,212,.2)', marginBottom: 20 }}>
+              <div style={{ fontWeight: 800, fontSize: 13, marginBottom: 10, paddingBottom: 8, borderBottom: '1px solid rgba(122,184,212,.12)', color: 'var(--blue)' }}>
+                ⛵ Für Charter freigegebene Wochen ({cw.length}W)
+              </div>
+              <div className="charter-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 7, marginBottom: 10 }}>
+                {cw.map(w => (
+                  <div key={w.id} style={{ background: 'rgba(122,184,212,.06)', border: '1px solid rgba(122,184,212,.2)', borderRadius: 7, padding: '9px 10px' }}>
+                    <div style={{ fontWeight: 700, fontSize: 11, color: 'var(--blue)' }}>{w.slotShort} W{w.wn}</div>
+                    <div style={{ fontSize: 10, color: 'rgba(249,246,240,.35)' }}>{w.type === 'EU' ? 'Mittelmeer' : 'Karibik'}</div>
+                    <div style={{ fontSize: 11, color: 'rgba(249,246,240,.55)', marginTop: 2 }}>{fmt(w.start)}</div>
+                    <div style={{ fontWeight: 700, color: 'var(--blue)', fontSize: 12, marginTop: 2 }}>ca. {eur(CR)}</div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ background: 'rgba(122,184,212,.06)', border: '1px solid rgba(122,184,212,.15)', borderRadius: 7, padding: '9px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <div style={{ fontWeight: 700, color: 'var(--blue)', fontSize: 12 }}>Netto-Erlös (65% nach Broker + Management)</div>
+                  <div style={{ fontSize: 10, color: 'rgba(122,184,212,.5)' }}>{cw.length}W × {eur(CR)} × 65%</div>
+                </div>
+                <div style={{ fontWeight: 800, color: 'var(--blue)', fontSize: 18 }}>{eur(cw.length * CR * .65)}</div>
+              </div>
+            </div>
+          );
+        })()}
+
+        {/* Tab bar + year filter */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: 10 }}>
+          <div style={{ display: 'flex', gap: 6 }}>
+            {[['cal','📅 Kalender'],['over','👥 Jahresübersicht']].map(([k, l]) => (
+              <button key={k} onClick={() => setTab(k)} style={{
+                padding: '8px 16px', borderRadius: 20,
+                border: `2px solid ${tab === k ? 'var(--gold)' : 'rgba(249,246,240,.12)'}`,
+                background: tab === k ? 'rgba(184,147,42,.15)' : 'transparent',
+                color: tab === k ? 'var(--gold)' : 'rgba(249,246,240,.5)',
+                fontWeight: 700, fontSize: 13
+              }}>{l}</button>
+            ))}
+          </div>
+          {tab === 'cal' && (
+            <div style={{ display: 'flex', gap: 5 }}>
+              {[['all','Alle'],['1','Jahr 1'],['2','Jahr 2'],['3','Jahr 3']].map(([k, l]) => (
+                <button key={k} onClick={() => setYr(k)} style={{
+                  padding: '6px 12px', borderRadius: 20,
+                  background: yr === k ? 'rgba(184,147,42,.15)' : 'transparent',
+                  color: yr === k ? 'var(--gold)' : 'rgba(249,246,240,.4)',
+                  border: `2px solid ${yr === k ? 'var(--gold)' : 'rgba(249,246,240,.1)'}`,
+                  fontWeight: 700, fontSize: 12
+                }}>{l}</button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Overview tab */}
+        {tab === 'over' && <Overview slots={slots} />}
+
+        {/* Calendar tab */}
+        {tab === 'cal' && years.map(y => {
+          const ey = YEAR0 + y - 1;
+          const eu  = slots.filter(s => s.yr === y && s.type === 'EU');
+          const kar = slots.filter(s => s.yr === y && s.type === 'KAR');
+          const myCount = allWeeks(slots).filter(w => w.owner === ME && w.yr === y).length;
+
+          return (
+            <div key={y} style={{ marginBottom: 32 }}>
+              {/* Year header */}
+              <div style={{
+                background: 'linear-gradient(135deg, var(--navy-mid) 0%, #1A2E50 100%)',
+                borderRadius: 12, padding: '13px 18px', marginBottom: 16,
+                border: '1px solid rgba(184,147,42,.25)',
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+              }}>
+                <div>
+                  <div style={{ color: 'var(--gold)', fontWeight: 800, fontSize: 16 }}>Jahr {y}</div>
+                  <div style={{ color: 'rgba(249,246,240,.35)', fontSize: 12 }}>Mittelmeer {ey} · Karibik {ey}–{ey+1}</div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ color: 'rgba(249,246,240,.35)', fontSize: 11 }}>Ihre Wochen</div>
+                  <div style={{ color: 'var(--gold)', fontWeight: 800, fontSize: 20 }}>{myCount}W</div>
+                </div>
+              </div>
+
+              {/* EU section */}
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 10, paddingBottom: 8, borderBottom: '1px solid rgba(134,239,172,.12)' }}>
+                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--green)' }} />
+                  <span style={{ fontWeight: 700, fontSize: 13, color: 'var(--green)' }}>Mittelmeer · {ey}</span>
+                  <span style={{ fontSize: 10, color: 'rgba(249,246,240,.25)', marginLeft: 'auto' }}>Slot anklicken → Wochen planen</span>
+                </div>
+                <div className="grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 10 }}>
+                  {eu.map(s => (
+                    <SlotCard key={s.id} slot={s} reqs={requests}
+                      expanded={expanded === s.id}
+                      onToggle={() => setExp(p => p === s.id ? null : s.id)} />
+                  ))}
+                  {eu.find(s => expanded === s.id) && (
+                    <SlotPanel
+                      slot={eu.find(s => expanded === s.id)}
+                      slots={slots} reqs={requests}
+                      onWeekAction={handleWeek}
+                      onClose={() => setExp(null)} />
+                  )}
+                </div>
+              </div>
+
+              {/* KAR section */}
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 10, paddingBottom: 8, borderBottom: '1px solid rgba(122,184,212,.12)' }}>
+                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--blue)' }} />
+                  <span style={{ fontWeight: 700, fontSize: 13, color: 'var(--blue)' }}>Karibik · {ey}–{ey+1}</span>
+                  <span style={{ fontSize: 10, color: 'rgba(249,246,240,.25)', marginLeft: 'auto' }}>Slot anklicken → Wochen planen</span>
+                </div>
+                <div className="grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 10 }}>
+                  {kar.map(s => (
+                    <SlotCard key={s.id} slot={s} reqs={requests}
+                      expanded={expanded === s.id}
+                      onToggle={() => setExp(p => p === s.id ? null : s.id)} />
+                  ))}
+                  {kar.find(s => expanded === s.id) && (
+                    <SlotPanel
+                      slot={kar.find(s => expanded === s.id)}
+                      slots={slots} reqs={requests}
+                      onWeekAction={handleWeek}
+                      onClose={() => setExp(null)} />
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+
+        {/* Legend */}
+        <div style={{ background: 'var(--navy-mid)', borderRadius: 9, padding: '10px 16px', display: 'flex', gap: 14, flexWrap: 'wrap', border: '1px solid rgba(249,246,240,.05)', marginTop: 8 }}>
+          <span style={{ fontSize: 11, color: 'rgba(249,246,240,.25)', fontWeight: 700 }}>LEGENDE:</span>
+          {[
+            [O.A.c, '● Eigentümer A'],
+            [O.B.c, '● Eigentümer B'],
+            [O.C.c, '● Eigentümer C'],
+            ['var(--green)',  '✓ Genutzt'],
+            ['var(--blue)',   '⛵ Charter'],
+            ['var(--purple)', '⇄ Getauscht'],
+            ['var(--gold)',   '💰 Zugekauft'],
+            ['var(--red)',    '💸 Verkauft'],
+            ['var(--gold)',   '⏳ Anfrage'],
+          ].map(([c, l]) => (
+            <div key={l} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <div style={{ width: 8, height: 8, borderRadius: '50%', background: c }} />
+              <span style={{ fontSize: 11, color: 'rgba(249,246,240,.4)' }}>{l}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

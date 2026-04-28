@@ -1,0 +1,249 @@
+const express = require('express');
+const fs = require('fs');
+const path = require('path');
+
+const app = express();
+const DB_PATH = path.join(__dirname, 'db.json');
+
+app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
+
+// ── DATA GENERATION ────────────────────────────────────────────────────────────
+const YEAR0 = 2026;
+const WP = 250000;
+const CR = 325000;
+
+const EQ = {1:"Frühsaison",2:"Frühsommer",3:"Hauptsaison",4:"★ HOCHSOMMER",5:"★ HOCHSOMMER",6:"Nachsaison"};
+const KQ = {1:"Vorsaison",2:"★ WEIHNACHTEN",3:"★ NEUJAHR",4:"Hochsaison",5:"Nachsaison",6:"Spätsaison"};
+const EP = new Set([4,5]);
+const KP = new Set([2,3]);
+
+function euOwner(sn, yr) { return ["A","B","C"][(sn - 1 + yr - 1) % 3]; }
+function karOwner(sn, yr) { return ["A","B","C"][(sn - 1 + yr - 1 + 1) % 3]; }
+function euBase(sn, yr) { const d = new Date(YEAR0 + yr - 1, 4, 15); d.setDate(d.getDate() + (sn - 1) * 21); return d; }
+function karBase(sn, yr) { const d = new Date(YEAR0 + yr - 1, 10, 15); d.setDate(d.getDate() + (sn - 1) * 21); return d; }
+function addDays(d, n) { const x = new Date(d); x.setDate(x.getDate() + n); return x; }
+function isoDate(d) { return d.toISOString().slice(0, 10); }
+
+function buildWeeks() {
+  const weeks = [];
+  for (let yr = 1; yr <= 3; yr++) {
+    for (let sn = 1; sn <= 6; sn++) {
+      const b = euBase(sn, yr);
+      const ow = euOwner(sn, yr);
+      const slotId = `eu${yr}_${sn}`;
+      for (let wn = 1; wn <= 3; wn++) {
+        const start = addDays(b, (wn - 1) * 7);
+        weeks.push({
+          id: `${slotId}_w${wn}`,
+          slotId, slotLabel: `EU ${sn}`, slotShort: `EU${sn}`,
+          type: "EU", season: EQ[sn], isPremium: EP.has(sn),
+          yr, sn, wn, origOwner: ow, owner: ow, status: null,
+          start: isoDate(start), end: isoDate(addDays(start, 6))
+        });
+      }
+    }
+    for (let sn = 1; sn <= 6; sn++) {
+      const b = karBase(sn, yr);
+      const ow = karOwner(sn, yr);
+      const slotId = `kar${yr}_${sn}`;
+      for (let wn = 1; wn <= 3; wn++) {
+        const start = addDays(b, (wn - 1) * 7);
+        weeks.push({
+          id: `${slotId}_w${wn}`,
+          slotId, slotLabel: `KAR ${sn}`, slotShort: `KAR${sn}`,
+          type: "KAR", season: KQ[sn], isPremium: KP.has(sn),
+          yr, sn, wn, origOwner: ow, owner: ow, status: null,
+          start: isoDate(start), end: isoDate(addDays(start, 6))
+        });
+      }
+    }
+  }
+  return weeks;
+}
+
+const DEMO_STATUS_OVERRIDES = {
+  "eu1_4_w1": { status: "use" },
+  "eu1_4_w2": { status: "charter" },
+  "eu1_5_w2": { status: "use" },
+  "kar1_2_w1": { status: "use" },
+  "eu2_1_w3": { status: "charter" },
+};
+
+const DEMO_OWNER_OVERRIDES = {
+  "eu2_2_w1": "C",
+  "kar2_1_w2": "B",
+};
+
+const DEMO_REQUESTS = [
+  { id:"req_demo_1", type:"swap", fromOwner:"A", toOwner:"B", myWid:"eu1_1_w2", theirWid:"eu1_5_w1", tgtWid:null, status:"pending", createdAt:"2026-04-20T10:30:00.000Z", resolvedAt:null },
+  { id:"req_demo_2", type:"buy",  fromOwner:"C", toOwner:"A", myWid:null, theirWid:null, tgtWid:"kar1_3_w2", status:"pending", createdAt:"2026-04-22T14:00:00.000Z", resolvedAt:null },
+  { id:"req_demo_3", type:"sell", fromOwner:"B", toOwner:"C", myWid:"kar1_1_w3", theirWid:null, tgtWid:null, status:"pending", createdAt:"2026-04-23T08:00:00.000Z", resolvedAt:null },
+  { id:"req_demo_4", type:"swap", fromOwner:"B", toOwner:"C", myWid:"eu2_2_w1", theirWid:"kar2_1_w2", tgtWid:null, status:"accepted", createdAt:"2026-03-10T11:00:00.000Z", resolvedAt:"2026-03-12T09:00:00.000Z" },
+  { id:"req_demo_5", type:"buy",  fromOwner:"A", toOwner:"C", myWid:null, theirWid:null, tgtWid:"eu3_3_w1", status:"declined", createdAt:"2026-02-15T16:00:00.000Z", resolvedAt:"2026-02-16T10:00:00.000Z" },
+];
+
+function buildInitialState() {
+  const weeks = buildWeeks().map(w => {
+    if (DEMO_OWNER_OVERRIDES[w.id]) w = { ...w, owner: DEMO_OWNER_OVERRIDES[w.id] };
+    if (DEMO_STATUS_OVERRIDES[w.id]) w = { ...w, ...DEMO_STATUS_OVERRIDES[w.id] };
+    return w;
+  });
+  return {
+    meta: { year0: YEAR0, weekPrice: WP, charterRate: CR },
+    weeks,
+    requests: DEMO_REQUESTS,
+  };
+}
+
+const INITIAL_STATE = buildInitialState();
+
+function loadDb() {
+  try {
+    return JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
+  } catch {
+    return null;
+  }
+}
+
+function saveDb(data) {
+  fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2), 'utf8');
+}
+
+let db = loadDb();
+if (!db || !db.weeks || db.weeks.length === 0) {
+  db = JSON.parse(JSON.stringify(INITIAL_STATE));
+  saveDb(db);
+  console.log('db.json initialized with demo state');
+}
+
+// ── HELPERS ────────────────────────────────────────────────────────────────────
+function isLocked(database, weekId) {
+  return database.requests.some(r =>
+    r.status === 'pending' &&
+    (r.myWid === weekId || r.theirWid === weekId || r.tgtWid === weekId)
+  );
+}
+
+// ── API ROUTES ─────────────────────────────────────────────────────────────────
+app.get('/api/state', (req, res) => {
+  db = loadDb();
+  res.json({ weeks: db.weeks, requests: db.requests, meta: db.meta });
+});
+
+app.patch('/api/weeks/:weekId/status', (req, res) => {
+  const { weekId } = req.params;
+  const { owner, status } = req.body;
+  db = loadDb();
+  const week = db.weeks.find(w => w.id === weekId);
+  if (!week) return res.status(404).json({ ok: false, error: 'Week not found' });
+  if (week.owner !== owner) return res.status(403).json({ ok: false, error: 'You do not own this week' });
+  if (isLocked(db, weekId)) return res.status(400).json({ ok: false, error: 'Week is locked by a pending request' });
+  const valid = [null, 'use', 'charter'];
+  if (!valid.includes(status)) return res.status(400).json({ ok: false, error: 'Invalid status' });
+  week.status = week.status === status ? null : status;
+  saveDb(db);
+  res.json({ ok: true, week });
+});
+
+app.post('/api/requests', (req, res) => {
+  db = loadDb();
+  const { type, fromOwner, myWid, theirWid, tgtWid, toOwner } = req.body;
+  if (!['swap','buy','sell'].includes(type)) return res.status(400).json({ ok: false, error: 'Invalid type' });
+
+  const wmap = Object.fromEntries(db.weeks.map(w => [w.id, w]));
+
+  if (type === 'swap') {
+    const mw = wmap[myWid]; const tw = wmap[theirWid];
+    if (!mw || !tw) return res.status(400).json({ ok: false, error: 'Week not found' });
+    if (mw.owner !== fromOwner) return res.status(403).json({ ok: false, error: 'You do not own myWid' });
+    if (tw.owner === fromOwner) return res.status(400).json({ ok: false, error: 'Cannot swap with your own week' });
+    if (isLocked(db, myWid) || isLocked(db, theirWid)) return res.status(400).json({ ok: false, error: 'A week is locked by a pending request' });
+    const newReq = { id: `req_${Date.now()}`, type: 'swap', fromOwner, toOwner: tw.owner, myWid, theirWid, tgtWid: null, status: 'pending', createdAt: new Date().toISOString(), resolvedAt: null };
+    db.requests.push(newReq);
+    saveDb(db);
+    return res.status(201).json({ ok: true, request: newReq });
+  }
+
+  if (type === 'buy') {
+    const tw = wmap[tgtWid];
+    if (!tw) return res.status(400).json({ ok: false, error: 'Week not found' });
+    if (tw.owner === fromOwner) return res.status(400).json({ ok: false, error: 'You already own this week' });
+    if (isLocked(db, tgtWid)) return res.status(400).json({ ok: false, error: 'Week is locked by a pending request' });
+    const newReq = { id: `req_${Date.now()}`, type: 'buy', fromOwner, toOwner: tw.owner, myWid: null, theirWid: null, tgtWid, status: 'pending', createdAt: new Date().toISOString(), resolvedAt: null };
+    db.requests.push(newReq);
+    saveDb(db);
+    return res.status(201).json({ ok: true, request: newReq });
+  }
+
+  if (type === 'sell') {
+    const mw = wmap[myWid];
+    if (!mw) return res.status(400).json({ ok: false, error: 'Week not found' });
+    if (mw.owner !== fromOwner) return res.status(403).json({ ok: false, error: 'You do not own this week' });
+    if (toOwner === fromOwner) return res.status(400).json({ ok: false, error: 'Cannot sell to yourself' });
+    if (!['A','B','C'].includes(toOwner)) return res.status(400).json({ ok: false, error: 'Invalid toOwner' });
+    if (isLocked(db, myWid)) return res.status(400).json({ ok: false, error: 'Week is locked by a pending request' });
+    const newReq = { id: `req_${Date.now()}`, type: 'sell', fromOwner, toOwner, myWid, theirWid: null, tgtWid: null, status: 'pending', createdAt: new Date().toISOString(), resolvedAt: null };
+    db.requests.push(newReq);
+    saveDb(db);
+    return res.status(201).json({ ok: true, request: newReq });
+  }
+});
+
+app.post('/api/requests/:id/respond', (req, res) => {
+  db = loadDb();
+  const { id } = req.params;
+  const { owner, decision } = req.body;
+  if (!['accepted','declined'].includes(decision)) return res.status(400).json({ ok: false, error: 'Invalid decision' });
+  const reqObj = db.requests.find(r => r.id === id);
+  if (!reqObj) return res.status(404).json({ ok: false, error: 'Request not found' });
+  if (reqObj.status !== 'pending') return res.status(400).json({ ok: false, error: 'Request is not pending' });
+  if (reqObj.toOwner !== owner) return res.status(403).json({ ok: false, error: 'Only the recipient can respond' });
+
+  const wmap = Object.fromEntries(db.weeks.map(w => [w.id, w]));
+  const affectedWeeks = [];
+
+  if (decision === 'accepted') {
+    if (reqObj.type === 'swap') {
+      const mw = wmap[reqObj.myWid]; const tw = wmap[reqObj.theirWid];
+      if (!mw || !tw) return res.status(400).json({ ok: false, error: 'Referenced weeks not found' });
+      if (mw.owner !== reqObj.fromOwner) return res.status(400).json({ ok: false, error: 'Week ownership has changed since this request was created' });
+      if (tw.owner !== reqObj.toOwner) return res.status(400).json({ ok: false, error: 'Week ownership has changed since this request was created' });
+      mw.owner = reqObj.toOwner; mw.status = null;
+      tw.owner = reqObj.fromOwner; tw.status = null;
+      affectedWeeks.push(mw, tw);
+    }
+    if (reqObj.type === 'buy') {
+      const tw = wmap[reqObj.tgtWid];
+      if (!tw) return res.status(400).json({ ok: false, error: 'Referenced week not found' });
+      if (tw.owner !== reqObj.toOwner) return res.status(400).json({ ok: false, error: 'Week ownership has changed since this request was created' });
+      tw.owner = reqObj.fromOwner; tw.status = null;
+      affectedWeeks.push(tw);
+    }
+    if (reqObj.type === 'sell') {
+      const mw = wmap[reqObj.myWid];
+      if (!mw) return res.status(400).json({ ok: false, error: 'Referenced week not found' });
+      if (mw.owner !== reqObj.fromOwner) return res.status(400).json({ ok: false, error: 'Week ownership has changed since this request was created' });
+      mw.owner = reqObj.toOwner; mw.status = null;
+      affectedWeeks.push(mw);
+    }
+  }
+
+  reqObj.status = decision;
+  reqObj.resolvedAt = new Date().toISOString();
+  saveDb(db);
+  res.json({ ok: true, request: reqObj, affectedWeeks });
+});
+
+app.post('/api/reset', (req, res) => {
+  db = JSON.parse(JSON.stringify(INITIAL_STATE));
+  saveDb(db);
+  res.json({ ok: true, message: 'Demo state restored' });
+});
+
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(500).json({ ok: false, error: err.message });
+});
+
+app.listen(3000, () => console.log('Yacht Planner running on http://localhost:3000'));
