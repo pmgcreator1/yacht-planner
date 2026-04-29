@@ -979,6 +979,7 @@ function App() {
   const [buyM,     setBuyM]     = useState(null);
   const [sellM,    setSellM]    = useState(null);
   const [toast,    setToast]    = useState(null);
+  const [showAll,  setShowAll]  = useState(false);
   const pollRef = useRef(null);
 
   const modalOpen = !!(swapM || buyM || sellM);
@@ -1121,7 +1122,7 @@ function App() {
         await fetch('/api/reset', { method: 'POST' });
         await fetchState();
         setExp(null);
-        notify('↺ Demo-Zustand wiederhergestellt');
+        notify('↺ Alles zurückgesetzt');
       }} />
 
       <div style={{ maxWidth: 1060, margin: '0 auto', padding: '0 20px 60px' }}>
@@ -1189,14 +1190,38 @@ function App() {
           )}
         </div>
 
+        {/* My Weeks / All toggle — calendar tab only */}
+        {tab === 'cal' && (
+          <div style={{ display: 'flex', gap: 6, marginBottom: 16 }}>
+            {[
+              [false, 'Meine Wochen'],
+              [true,  'Alle anzeigen'],
+            ].map(([val, label]) => (
+              <button key={label}
+                onClick={() => { setShowAll(val); if (!val) setExp(null); }}
+                style={{
+                  padding: '7px 16px', borderRadius: 20,
+                  border: `2px solid ${showAll === val ? 'var(--gold)' : 'rgba(249,246,240,.12)'}`,
+                  background: showAll === val ? 'rgba(184,147,42,.15)' : 'transparent',
+                  color: showAll === val ? 'var(--gold)' : 'rgba(249,246,240,.4)',
+                  fontWeight: 700, fontSize: 13,
+                }}>
+                {label}
+              </button>
+            ))}
+          </div>
+        )}
+
         {/* Overview tab */}
         {tab === 'over' && <Overview slots={slots} />}
 
         {/* Calendar tab */}
         {tab === 'cal' && years.map(y => {
           const ey = YEAR0 + y - 1;
-          const eu  = slots.filter(s => s.yr === y && s.type === 'EU');
-          const kar = slots.filter(s => s.yr === y && s.type === 'KAR');
+          const allEu  = slots.filter(s => s.yr === y && s.type === 'EU');
+          const allKar = slots.filter(s => s.yr === y && s.type === 'KAR');
+          const eu  = showAll ? allEu  : allEu.filter(s => s.weeks.some(w => w.owner === ME));
+          const kar = showAll ? allKar : allKar.filter(s => s.weeks.some(w => w.owner === ME));
           const myCount = allWeeks(slots).filter(w => w.owner === ME && w.yr === y).length;
 
           return (
