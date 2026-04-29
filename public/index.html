@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -91,14 +91,14 @@ const WP = 250000;
 const CR = 325000;
 
 const O = {
-  A: { name: "Eigentümer A", label: "A", c: "#F5A623", bg: "#201500", bd: "#F5A62355", emoji: "🟡" },
-  B: { name: "Eigentümer B", label: "B", c: "#4F9EF0", bg: "#001525", bd: "#4F9EF055", emoji: "🔵" },
-  C: { name: "Eigentümer C", label: "C", c: "#D87FED", bg: "#160020", bd: "#D87FED55", emoji: "🟣" },
+  A: { name: "Owner A", label: "A", c: "#F5A623", bg: "#201500", bd: "#F5A62355", emoji: "🟡" },
+  B: { name: "Owner B", label: "B", c: "#4F9EF0", bg: "#001525", bd: "#4F9EF055", emoji: "🔵" },
+  C: { name: "Owner C", label: "C", c: "#D87FED", bg: "#160020", bd: "#D87FED55", emoji: "🟣" },
 };
 
-const EQ = {1:"Frühsaison",2:"Frühsommer",3:"Hauptsaison",4:"★ HOCHSOMMER",5:"★ HOCHSOMMER",6:"Nachsaison"};
-const KQ = {1:"Vorsaison",2:"★ WEIHNACHTEN",3:"★ NEUJAHR",4:"Hochsaison",5:"Nachsaison",6:"Spätsaison"};
-const MO = ["","Jan","Feb","Mär","Apr","Mai","Jun","Jul","Aug","Sep","Okt","Nov","Dez"];
+const EQ = {1:"Early Season",2:"Early Summer",3:"High Season",4:"★ HIGH SUMMER",5:"★ HIGH SUMMER",6:"Late Season"};
+const KQ = {1:"Pre-Season",2:"★ CHRISTMAS",3:"★ NEW YEAR",4:"Peak Season",5:"Late Season",6:"Off-Season"};
+const MO = ["","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
 function getOwner() {
   const p = new URLSearchParams(window.location.search);
@@ -148,7 +148,7 @@ function buildSlots(weeks) {
 const Pill = ({ bg, color = '#fff', children }) => (
   <span style={{
     display: 'inline-block', padding: '2px 9px', borderRadius: 20,
-    fontSize: 11, fontWeight: 700, background: bg, color, whiteSpace: 'nowrap'
+    fontSize: 13, fontWeight: 700, background: bg, color, whiteSpace: 'nowrap'
   }}>{children}</span>
 );
 
@@ -167,16 +167,16 @@ function WeekCard({ week, slots, reqs, onAction }) {
     : null;
 
   const statusTxt = doneR
-    ? (doneR.type === 'swap' ? 'Getauscht' : doneR.type === 'buy' ? 'Zugekauft' : 'Verkauft')
+    ? (doneR.type === 'swap' ? 'Swapped' : doneR.type === 'buy' ? 'Purchased' : 'Sold')
     : pend
       ? (pend.type === 'swap' && counter
-          ? `Tausch ↔ ${fmts(counter.start)}–${fmts(counter.end)}`
-          : 'Anfrage läuft')
-      : isUse ? 'Wird genutzt'
-      : isCh  ? 'Verchartert'
-      : 'Noch offen';
+          ? `Swap ↔ ${fmts(counter.start)}–${fmts(counter.end)}`
+          : 'Request pending')
+      : isUse ? 'In use'
+      : isCh  ? 'Chartered'
+      : 'Available';
 
-  const WLABELS = ['Woche 1', 'Woche 2', 'Woche 3'];
+  const WLABELS = ['Week 1', 'Week 2', 'Week 3'];
 
   const accentColor = locked ? 'var(--gold)' : ow.c;
   const statusBg    = locked ? ow.c + '22' : isUse ? '#14532d55' : isCh ? '#1e3a5f55' : 'rgba(249,246,240,.06)';
@@ -209,12 +209,12 @@ function WeekCard({ week, slots, reqs, onAction }) {
             {WLABELS[week.wn - 1]}
             {week.isPremium && <span style={{ color: 'var(--gold)', marginLeft: 6, fontSize: 12 }}>★</span>}
           </div>
-          <div style={{ fontSize: 11, color: 'rgba(249,246,240,.4)', marginTop: 1 }}>
+          <div style={{ fontSize: 13, color: 'rgba(249,246,240,.4)', marginTop: 1 }}>
             {fmt(week.start)} – {fmt(week.end)}
           </div>
         </div>
         {/* Status badge */}
-        <span style={{ background: statusBg, color: statusColor, fontSize: 11, fontWeight: 700, borderRadius: 20, padding: '3px 10px', whiteSpace: 'nowrap' }}>
+        <span style={{ background: statusBg, color: statusColor, fontSize: 13, fontWeight: 700, borderRadius: 20, padding: '3px 10px', whiteSpace: 'nowrap' }}>
           {statusIcon} {statusTxt}
         </span>
       </div>
@@ -224,32 +224,32 @@ function WeekCard({ week, slots, reqs, onAction }) {
           {isMine ? (
             <>
               <button onClick={() => onAction(week, 'use')} style={{
-                flex: '1 1 80px', padding: '7px 4px', borderRadius: 6, fontWeight: 700, fontSize: 11,
+                flex: '1 1 80px', padding: '7px 4px', borderRadius: 6, fontWeight: 700, fontSize: 13,
                 border: `2px solid ${isUse ? '#86efac' : '#86efac44'}`,
                 background: isUse ? '#14532d' : 'transparent',
                 color: '#86efac'
-              }}>{isUse ? '✓ Genutzt ↩' : '✓ Nutzen'}</button>
+              }}>{isUse ? '✓ In use ↩' : '✓ Use'}</button>
               <button onClick={() => onAction(week, 'charter')} style={{
-                flex: '1 1 90px', padding: '7px 4px', borderRadius: 6, fontWeight: 700, fontSize: 11,
+                flex: '1 1 90px', padding: '7px 4px', borderRadius: 6, fontWeight: 700, fontSize: 13,
                 border: `2px solid ${isCh ? '#7AB8D4' : '#7AB8D444'}`,
                 background: isCh ? '#1e3a5f' : 'transparent',
                 color: '#7AB8D4'
-              }}>{isCh ? '⛵ Charter ↩' : '⛵ Verchartern'}</button>
+              }}>{isCh ? '⛵ Charter ↩' : '⛵ Charter'}</button>
               <button onClick={() => onAction(week, 'swap')} style={{
-                flex: '1 1 80px', padding: '7px 4px', borderRadius: 6, fontWeight: 700, fontSize: 11,
+                flex: '1 1 80px', padding: '7px 4px', borderRadius: 6, fontWeight: 700, fontSize: 13,
                 border: `2px solid var(--gold-lt)44`, background: 'transparent', color: 'var(--gold-lt)'
-              }}>⇄ Tauschen</button>
+              }}>⇄ Swap</button>
               <button onClick={() => onAction(week, 'sell')} style={{
-                flex: '1 1 100px', padding: '7px 4px', borderRadius: 6, fontWeight: 700, fontSize: 11,
+                flex: '1 1 100px', padding: '7px 4px', borderRadius: 6, fontWeight: 700, fontSize: 13,
                 border: '2px solid #f8717144', background: 'transparent', color: '#f87171'
-              }}>💸 Verkaufen</button>
+              }}>💸 Sell</button>
             </>
           ) : (
             <button onClick={() => onAction(week, 'buy')} style={{
               width: '100%', padding: '8px 0', borderRadius: 6, fontWeight: 700, fontSize: 12,
               border: `2px solid ${ow.c}44`, background: 'transparent',
               color: ow.c
-            }}>💰 Woche kaufen · {eur(WP)}</button>
+            }}>💰 Buy week · {eur(WP)}</button>
           )}
         </div>
       )}
@@ -287,14 +287,14 @@ function SlotPanel({ slot, slots, reqs, onWeekAction, onClose }) {
             </span>
           </div>
           <div style={{ color: 'rgba(249,246,240,.5)', fontSize: 12, marginTop: 2 }}>
-            {slot.qual} · {slot.type === 'EU' ? 'Mittelmeer' : 'Karibik'} · {ow.name}
-            {myCount > 0 && <span style={{ marginLeft: 8, fontWeight: 700, color: ow.c }}>· {myCount}/3 Wochen Ihre</span>}
+            {slot.qual} · {slot.type === 'EU' ? 'Mediterranean' : 'Caribbean'} · {ow.name}
+            {myCount > 0 && <span style={{ marginLeft: 8, fontWeight: 700, color: ow.c }}>· {myCount}/3 weeks yours</span>}
           </div>
         </div>
         <button onClick={onClose} style={{
           background: 'transparent', border: `2px solid ${ow.c}`,
           color: ow.c, borderRadius: 20, padding: '8px 20px', fontWeight: 700, fontSize: 13
-        }}>← Zurück</button>
+        }}>← Back</button>
       </div>
       <div style={{ padding: '14px 18px', display: 'flex', flexDirection: 'column', gap: 6 }}>
         {slot.weeks.map(w => (
@@ -349,12 +349,12 @@ function SlotCard({ slot, reqs, expanded, onToggle }) {
         </div>
         {/* Ownership badge */}
         {myW === 3 && (
-          <span style={{ background: ow.c + '33', color: ow.c, fontSize: 9, fontWeight: 800, borderRadius: 6, padding: '2px 7px', flexShrink: 0, border: `1px solid ${ow.c}55` }}>
-            MEIN SLOT
+          <span style={{ background: ow.c + '33', color: ow.c, fontSize: 13, fontWeight: 800, borderRadius: 6, padding: '2px 7px', flexShrink: 0, border: `1px solid ${ow.c}55` }}>
+            MY SLOT
           </span>
         )}
         {myW > 0 && myW < 3 && (
-          <span style={{ background: ow.c + '22', color: ow.c, fontSize: 9, fontWeight: 700, borderRadius: 6, padding: '2px 7px', flexShrink: 0 }}>
+          <span style={{ background: ow.c + '22', color: ow.c, fontSize: 13, fontWeight: 700, borderRadius: 6, padding: '2px 7px', flexShrink: 0 }}>
             {myW}/3
           </span>
         )}
@@ -365,7 +365,7 @@ function SlotCard({ slot, reqs, expanded, onToggle }) {
             const d = doneReq(reqs, w.id);
             return (
               <div key={w.id}
-                title={p ? 'Anfrage läuft' : d ? 'Abgeschlossen' : w.status === 'use' ? 'Genutzt' : w.status === 'charter' ? 'Charter' : 'Offen'}
+                title={p ? 'Pending' : d ? 'Completed' : w.status === 'use' ? 'In use' : w.status === 'charter' ? 'Charter' : 'Open'}
                 style={{
                   width: 10, height: 10, borderRadius: 3,
                   background: p ? 'var(--gold)' : d ? '#C4B5FD'
@@ -384,7 +384,7 @@ function SlotCard({ slot, reqs, expanded, onToggle }) {
         <div style={{ fontWeight: 700, fontSize: 12, color: hasWeeks ? 'var(--cream)' : 'rgba(249,246,240,.45)', marginBottom: 1 }}>
           {fmts(slot.start)} – {fmts(slot.end)}
         </div>
-        <div style={{ fontSize: 10, color: slot.prem ? 'var(--gold)' : 'rgba(249,246,240,.35)', fontWeight: slot.prem ? 700 : 400, marginBottom: 6 }}>
+        <div style={{ fontSize: 12, color: slot.prem ? 'var(--gold)' : 'rgba(249,246,240,.35)', fontWeight: slot.prem ? 700 : 400, marginBottom: 6 }}>
           {slot.qual}
         </div>
         {hasWeeks && (
@@ -418,9 +418,9 @@ function SwapModal({ myWeek, slots, reqs, onSend, onClose }) {
       <div className="modal">
         <div style={{ background: 'linear-gradient(135deg, var(--gold) 0%, #8a6a1a 100%)', padding: '18px 24px', borderRadius: '12px 12px 0 0', display: 'flex', alignItems: 'center', gap: 12 }}>
           <div style={{ flex: 1, color: 'var(--navy)' }}>
-            <div style={{ fontWeight: 800, fontSize: 17 }}>Woche tauschen</div>
+            <div style={{ fontWeight: 800, fontSize: 17 }}>Swap Week</div>
             <div style={{ fontSize: 12, opacity: .8, marginTop: 2 }}>
-              Ich biete: <b>{myWeek.slotShort} · W{myWeek.wn}</b> &nbsp; {fmt(myWeek.start)} – {fmt(myWeek.end)}
+              I offer: <b>{myWeek.slotShort} · W{myWeek.wn}</b> &nbsp; {fmt(myWeek.start)} – {fmt(myWeek.end)}
             </div>
           </div>
           <button onClick={onClose} style={{ background: 'rgba(0,0,0,.2)', border: 'none', color: 'var(--navy)', borderRadius: 20, padding: '6px 16px', fontWeight: 700, fontSize: 13 }}>✕</button>
@@ -431,19 +431,19 @@ function SwapModal({ myWeek, slots, reqs, onSend, onClose }) {
           <div style={{ background: O[ME].bg, border: `2px solid ${O[ME].c}`, borderRadius: 10, padding: '10px 16px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{ background: O[ME].c, color: 'var(--navy)', borderRadius: '50%', width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 15 }}>{ME}</div>
             <div>
-              <div style={{ fontSize: 10, color: O[ME].c, fontWeight: 700 }}>ICH BIETE AN</div>
+              <div style={{ fontSize: 12, color: O[ME].c, fontWeight: 700 }}>I OFFER</div>
               <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--cream)' }}>
                 {myWeek.slotShort} · W{myWeek.wn}
                 {myWeek.isPremium && <span style={{ color: 'var(--gold)', marginLeft: 6, fontSize: 12 }}>★</span>}
               </div>
-              <div style={{ fontSize: 12, color: 'rgba(249,246,240,.5)' }}>{fmt(myWeek.start)} – {fmt(myWeek.end)} · {myWeek.type === 'EU' ? 'Mittelmeer' : 'Karibik'}</div>
+              <div style={{ fontSize: 12, color: 'rgba(249,246,240,.5)' }}>{fmt(myWeek.start)} – {fmt(myWeek.end)} · {myWeek.type === 'EU' ? 'Mediterranean' : 'Caribbean'}</div>
             </div>
           </div>
 
           {/* Filter */}
           <div style={{ display: 'flex', gap: 6, marginBottom: 12, alignItems: 'center' }}>
-            <span style={{ fontSize: 12, color: 'rgba(249,246,240,.4)', marginRight: 4 }}>Zeige:</span>
-            {[['all','Alle'],['EU','Mittelmeer'],['KAR','Karibik']].map(([k, l]) => (
+            <span style={{ fontSize: 12, color: 'rgba(249,246,240,.4)', marginRight: 4 }}>Show:</span>
+            {[['all','All'],['EU','Mediterranean'],['KAR','Caribbean']].map(([k, l]) => (
               <button key={k} onClick={() => setFilter(k)} style={{
                 padding: '4px 12px', borderRadius: 20,
                 border: `2px solid ${filter === k ? 'var(--gold)' : 'rgba(249,246,240,.15)'}`,
@@ -452,13 +452,13 @@ function SwapModal({ myWeek, slots, reqs, onSend, onClose }) {
                 fontWeight: 700, fontSize: 12
               }}>{l}</button>
             ))}
-            <span style={{ fontSize: 11, color: 'rgba(249,246,240,.25)', marginLeft: 'auto' }}>{shown.length} verfügbar</span>
+            <span style={{ fontSize: 13, color: 'rgba(249,246,240,.25)', marginLeft: 'auto' }}>{shown.length} available</span>
           </div>
 
           {/* Week list */}
           <div style={{ border: '1px solid rgba(249,246,240,.1)', borderRadius: 10, maxHeight: 300, overflowY: 'auto', marginBottom: 14 }}>
             {shown.length === 0
-              ? <div style={{ padding: 20, textAlign: 'center', color: 'rgba(249,246,240,.35)', fontSize: 13 }}>Keine Wochen verfügbar</div>
+              ? <div style={{ padding: 20, textAlign: 'center', color: 'rgba(249,246,240,.35)', fontSize: 13 }}>No weeks available</div>
               : shown.map((w, i) => {
                 const ow = O[w.owner];
                 const isSel = sel?.id === w.id;
@@ -473,8 +473,8 @@ function SwapModal({ myWeek, slots, reqs, onSend, onClose }) {
                     <div style={{ width: 10, height: 10, borderRadius: '50%', background: ow.c, flexShrink: 0 }} />
                     <div style={{ flex: 1 }}>
                       <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--cream)' }}>{fmt(w.start)} – {fmt(w.end)}</div>
-                      <div style={{ fontSize: 11, color: 'rgba(249,246,240,.45)', marginTop: 1 }}>
-                        {w.slotShort} · W{w.wn} · {w.type === 'EU' ? 'Mittelmeer' : 'Karibik'}
+                      <div style={{ fontSize: 13, color: 'rgba(249,246,240,.45)', marginTop: 1 }}>
+                        {w.slotShort} · W{w.wn} · {w.type === 'EU' ? 'Mediterranean' : 'Caribbean'}
                         {w.isPremium && <span style={{ color: 'var(--gold)', fontWeight: 700, marginLeft: 6 }}>★</span>}
                       </div>
                     </div>
@@ -489,19 +489,19 @@ function SwapModal({ myWeek, slots, reqs, onSend, onClose }) {
           {/* Send or placeholder */}
           {sel ? (
             <div style={{ background: O[sel.owner].bg, border: `2px solid ${O[sel.owner].c}`, borderRadius: 10, padding: '12px 16px' }}>
-              <div style={{ fontSize: 10, color: O[sel.owner].c, fontWeight: 700, marginBottom: 4 }}>ICH MÖCHTE ERHALTEN</div>
+              <div style={{ fontSize: 12, color: O[sel.owner].c, fontWeight: 700, marginBottom: 4 }}>I WANT TO RECEIVE</div>
               <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--cream)', marginBottom: 10 }}>
                 {sel.slotShort} · W{sel.wn} · {fmt(sel.start)} – {fmt(sel.end)}
-                <span style={{ marginLeft: 8, fontWeight: 700, color: O[sel.owner].c, fontSize: 12 }}>von {O[sel.owner].name}</span>
+                <span style={{ marginLeft: 8, fontWeight: 700, color: O[sel.owner].c, fontSize: 12 }}>from {O[sel.owner].name}</span>
               </div>
               <button onClick={() => { onSend(myWeek, sel); onClose(); }}
                 style={{ width: '100%', padding: 12, borderRadius: 8, border: 'none', background: 'var(--gold)', color: 'var(--navy)', fontWeight: 800, fontSize: 15, cursor: 'pointer' }}>
-                Tausch-Anfrage absenden →
+                Send swap request →
               </button>
             </div>
           ) : (
             <div style={{ padding: '10px 14px', background: 'rgba(249,246,240,.04)', borderRadius: 10, fontSize: 12, color: 'rgba(249,246,240,.3)', textAlign: 'center' }}>
-              ↑ Woche aus der Liste auswählen
+              ↑ Select a week from the list above
             </div>
           )}
         </div>
@@ -518,36 +518,36 @@ function BuyModal({ week, onSend, onClose }) {
     <div className="modal-bg" onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="modal" style={{ maxWidth: 440 }}>
         <div style={{ background: ow.c + '22', borderBottom: `1px solid ${ow.c}`, padding: '16px 22px', borderRadius: '12px 12px 0 0' }}>
-          <div style={{ color: ow.c, fontWeight: 800, fontSize: 17 }}>Woche kaufen</div>
+          <div style={{ color: ow.c, fontWeight: 800, fontSize: 17 }}>Buy Week</div>
           <div style={{ color: 'rgba(249,246,240,.55)', fontSize: 12, marginTop: 2 }}>{week.slotShort} · W{week.wn} · {fmt(week.start)} – {fmt(week.end)}</div>
         </div>
         <div style={{ padding: '22px 24px' }}>
           <div className="grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 18 }}>
             <div style={{ background: ow.bg, border: `2px solid ${ow.c}`, borderRadius: 10, padding: 14 }}>
-              <div style={{ fontSize: 10, color: ow.c, fontWeight: 700, marginBottom: 6 }}>SIE KAUFEN</div>
+              <div style={{ fontSize: 12, color: ow.c, fontWeight: 700, marginBottom: 6 }}>YOU BUY</div>
               <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--cream)' }}>{week.slotShort} · W{week.wn}</div>
               <div style={{ fontSize: 12, color: 'rgba(249,246,240,.5)', marginTop: 2 }}>{fmt(week.start)}</div>
-              <div style={{ fontSize: 12, color: 'rgba(249,246,240,.5)' }}>bis {fmt(week.end)}</div>
-              <div style={{ fontSize: 11, color: ow.c, fontWeight: 700, marginTop: 6 }}>von {ow.name}</div>
+              <div style={{ fontSize: 12, color: 'rgba(249,246,240,.5)' }}>to {fmt(week.end)}</div>
+              <div style={{ fontSize: 13, color: ow.c, fontWeight: 700, marginTop: 6 }}>from {ow.name}</div>
             </div>
             <div style={{ background: '#051507', border: '2px solid var(--green)', borderRadius: 10, padding: 14 }}>
-              <div style={{ fontSize: 10, color: 'var(--green)', fontWeight: 700, marginBottom: 6 }}>KAUFPREIS</div>
+              <div style={{ fontSize: 12, color: 'var(--green)', fontWeight: 700, marginBottom: 6 }}>PURCHASE PRICE</div>
               <div style={{ fontSize: 28, fontWeight: 800, color: 'var(--green)' }}>{eur(WP)}</div>
-              <div style={{ fontSize: 11, color: 'rgba(249,246,240,.4)', marginTop: 4 }}>Festpreis</div>
+              <div style={{ fontSize: 13, color: 'rgba(249,246,240,.4)', marginTop: 4 }}>Fixed price</div>
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18, padding: '10px 14px', background: 'rgba(184,147,42,.08)', border: '1px solid rgba(184,147,42,.3)', borderRadius: 8, cursor: 'pointer' }}
             onClick={() => setOk(v => !v)}>
             <input type="checkbox" checked={ok} onChange={e => setOk(e.target.checked)} style={{ width: 18, height: 18, cursor: 'pointer', accentColor: 'var(--gold)' }} />
-            <label style={{ fontSize: 12, color: 'var(--gold)', cursor: 'pointer', fontWeight: 600 }}>Ich bestätige die Kauf-Anfrage für {eur(WP)}.</label>
+            <label style={{ fontSize: 12, color: 'var(--gold)', cursor: 'pointer', fontWeight: 600 }}>I confirm the purchase request for {eur(WP)}.</label>
           </div>
           <div style={{ display: 'flex', gap: 10 }}>
             <button disabled={!ok} onClick={() => { onSend(week); onClose(); }}
               style={{ flex: 1, padding: 11, borderRadius: 8, border: 'none', background: ok ? 'var(--gold)' : 'rgba(255,255,255,.08)', color: ok ? 'var(--navy)' : 'rgba(249,246,240,.25)', fontWeight: 700, fontSize: 13 }}>
-              Anfrage absenden →
+              Send request →
             </button>
             <button onClick={onClose} style={{ padding: '11px 20px', borderRadius: 8, border: '1px solid rgba(249,246,240,.15)', background: 'transparent', color: 'rgba(249,246,240,.55)', fontWeight: 700, fontSize: 13 }}>
-              Abbrechen
+              Cancel
             </button>
           </div>
         </div>
@@ -564,12 +564,12 @@ function SellModal({ week, onSend, onClose }) {
     <div className="modal-bg" onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="modal" style={{ maxWidth: 440 }}>
         <div style={{ background: 'rgba(248,113,113,.12)', borderBottom: '1px solid rgba(248,113,113,.4)', padding: '16px 22px', borderRadius: '12px 12px 0 0' }}>
-          <div style={{ color: 'var(--red)', fontWeight: 800, fontSize: 17 }}>Woche verkaufen</div>
+          <div style={{ color: 'var(--red)', fontWeight: 800, fontSize: 17 }}>Sell Week</div>
           <div style={{ color: 'rgba(249,246,240,.55)', fontSize: 12, marginTop: 2 }}>{week.slotShort} · W{week.wn} · {fmt(week.start)} – {fmt(week.end)}</div>
         </div>
         <div style={{ padding: '22px 24px' }}>
           <div style={{ fontSize: 13, color: 'var(--cream)', marginBottom: 16 }}>
-            Preis: <b style={{ color: 'var(--gold)' }}>{eur(WP)}</b>. An wen soll das Angebot?
+            Price: <b style={{ color: 'var(--gold)' }}>{eur(WP)}</b>. Who should receive the offer?
           </div>
           <div className="grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 20 }}>
             {others.map(ow => {
@@ -584,7 +584,7 @@ function SellModal({ week, onSend, onClose }) {
                 }}>
                   <div style={{ fontWeight: 800, fontSize: 24, color: o.c, marginBottom: 3 }}>{ow}</div>
                   <div style={{ fontWeight: 600, fontSize: 13, color: 'var(--cream)' }}>{o.name}</div>
-                  <div style={{ fontSize: 11, color: 'rgba(249,246,240,.4)', marginTop: 4 }}>erhält {eur(WP)} Angebot</div>
+                  <div style={{ fontSize: 13, color: 'rgba(249,246,240,.4)', marginTop: 4 }}>receives {eur(WP)} offer</div>
                   {isSel && <div style={{ color: o.c, fontWeight: 800, fontSize: 18, marginTop: 4 }}>✓</div>}
                 </div>
               );
@@ -593,10 +593,10 @@ function SellModal({ week, onSend, onClose }) {
           <div style={{ display: 'flex', gap: 10 }}>
             <button disabled={!sel} onClick={() => { onSend(week, sel); onClose(); }}
               style={{ flex: 1, padding: 11, borderRadius: 8, border: 'none', background: sel ? 'var(--red)' : 'rgba(255,255,255,.08)', color: sel ? '#fff' : 'rgba(249,246,240,.25)', fontWeight: 700, fontSize: 13 }}>
-              Angebot senden →
+              Send offer →
             </button>
             <button onClick={onClose} style={{ padding: '11px 20px', borderRadius: 8, border: '1px solid rgba(249,246,240,.15)', background: 'transparent', color: 'rgba(249,246,240,.55)', fontWeight: 700, fontSize: 13 }}>
-              Abbrechen
+              Cancel
             </button>
           </div>
         </div>
@@ -623,41 +623,41 @@ function Tabelle({ slots, reqs }) {
   };
 
   const rows = [
-    { l: 'Jahr 1', sub: `EU ${YEAR0} / KAR ${YEAR0}–${YEAR0+1}`, d: calcYear(1) },
-    { l: 'Jahr 2', sub: `EU ${YEAR0+1} / KAR ${YEAR0+1}–${YEAR0+2}`, d: calcYear(2) },
-    { l: 'Jahr 3', sub: `EU ${YEAR0+2} / KAR ${YEAR0+2}–${YEAR0+3}`, d: calcYear(3) },
-    { l: 'Gesamt', sub: '36 Wochen', d: calcYear('all'), tot: true },
+    { l: 'Year 1', sub: `EU ${YEAR0} / KAR ${YEAR0}–${YEAR0+1}`, d: calcYear(1) },
+    { l: 'Year 2', sub: `EU ${YEAR0+1} / KAR ${YEAR0+1}–${YEAR0+2}`, d: calcYear(2) },
+    { l: 'Year 3', sub: `EU ${YEAR0+2} / KAR ${YEAR0+2}–${YEAR0+3}`, d: calcYear(3) },
+    { l: 'Total', sub: '36 Weeks', d: calcYear('all'), tot: true },
   ];
   const cols = [
-    { k: 'use',  l: '✓ Genutzt',    bg: '#071507', c: 'var(--green)' },
-    { k: 'ch',   l: '⛵ Charter',   bg: '#051520', c: 'var(--blue)' },
-    { k: 'sw',   l: '⇄ Getauscht', bg: '#120A30', c: 'var(--purple)' },
-    { k: 'pu',   l: '💰 Zugekauft', bg: '#1C1505', c: 'var(--gold)' },
-    { k: 'sold', l: '💸 Verkauft',  bg: '#200A0A', c: 'var(--red)' },
-    { k: 'op',   l: '○ Offen',     bg: 'rgba(249,246,240,.04)', c: 'rgba(249,246,240,.35)' },
-    { k: 'tot',  l: 'Σ Total',     bg: 'rgba(249,246,240,.07)', c: 'var(--cream)' },
-    { k: 'rev',  l: 'Charter-Erlös', bg: '#051520', c: 'var(--blue)', money: true },
+    { k: 'use',  l: '✓ In Use',      bg: '#071507', c: 'var(--green)' },
+    { k: 'ch',   l: '⛵ Charter',    bg: '#051520', c: 'var(--blue)' },
+    { k: 'sw',   l: '⇄ Swapped',    bg: '#120A30', c: 'var(--purple)' },
+    { k: 'pu',   l: '💰 Purchased',  bg: '#1C1505', c: 'var(--gold)' },
+    { k: 'sold', l: '💸 Sold',       bg: '#200A0A', c: 'var(--red)' },
+    { k: 'op',   l: '○ Open',        bg: 'rgba(249,246,240,.04)', c: 'rgba(249,246,240,.35)' },
+    { k: 'tot',  l: 'Σ Total',       bg: 'rgba(249,246,240,.07)', c: 'var(--cream)' },
+    { k: 'rev',  l: 'Charter Revenue', bg: '#051520', c: 'var(--blue)', money: true },
   ];
 
   return (
     <div style={{ background: 'var(--navy-mid)', borderRadius: 12, padding: '16px 18px', border: '1px solid rgba(184,147,42,.2)', marginBottom: 20 }}>
       <div style={{ fontWeight: 800, fontSize: 14, color: 'var(--gold)', marginBottom: 12, paddingBottom: 10, borderBottom: '1px solid rgba(184,147,42,.2)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        📊 Meine Wochen-Auswertung
-        <span style={{ fontSize: 11, color: 'rgba(249,246,240,.3)', fontWeight: 400 }}>{O[ME].name} · 36 Wochen total</span>
+        📊 My Week Overview
+        <span style={{ fontSize: 13, color: 'rgba(249,246,240,.3)', fontWeight: 400 }}>{O[ME].name} · 36 weeks total</span>
       </div>
       <div className="stats-scroll">
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
           <thead>
             <tr style={{ background: 'rgba(249,246,240,.03)' }}>
-              <th style={{ textAlign: 'left', padding: '7px 10px', fontWeight: 700, color: 'rgba(249,246,240,.35)', fontSize: 11, minWidth: 160 }}>Zeitraum</th>
-              {cols.map(c => <th key={c.k} style={{ textAlign: 'center', padding: '7px 8px', fontWeight: 700, color: c.c, fontSize: 11, whiteSpace: 'nowrap', minWidth: 65 }}>{c.l}</th>)}
+              <th style={{ textAlign: 'left', padding: '7px 10px', fontWeight: 700, color: 'rgba(249,246,240,.35)', fontSize: 13, minWidth: 160 }}>Period</th>
+              {cols.map(c => <th key={c.k} style={{ textAlign: 'center', padding: '7px 8px', fontWeight: 700, color: c.c, fontSize: 13, whiteSpace: 'nowrap', minWidth: 65 }}>{c.l}</th>)}
             </tr>
           </thead>
           <tbody>
             {rows.map((r, i) => (
               <tr key={i} style={{ background: r.tot ? 'rgba(184,147,42,.06)' : 'transparent', borderTop: r.tot ? '1.5px solid rgba(184,147,42,.3)' : '1px solid rgba(249,246,240,.05)' }}>
                 <td style={{ padding: '9px 10px', fontWeight: r.tot ? 800 : 600, color: r.tot ? 'var(--gold)' : 'var(--cream)' }}>
-                  {r.l}<div style={{ fontSize: 10, color: 'rgba(249,246,240,.3)', fontWeight: 400 }}>{r.sub}</div>
+                  {r.l}<div style={{ fontSize: 12, color: 'rgba(249,246,240,.3)', fontWeight: 400 }}>{r.sub}</div>
                 </td>
                 {cols.map(c => {
                   const v = r.d[c.k];
@@ -687,8 +687,8 @@ function Inbox({ reqs, slots, onAccept, onDecline }) {
   return (
     <div style={{ background: 'rgba(184,147,42,.07)', border: '2px solid var(--gold)', borderRadius: 12, padding: '16px 18px', marginBottom: 20 }}>
       <div style={{ fontWeight: 800, color: 'var(--gold)', fontSize: 14, marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
-        ⏳ Ausstehende Anfragen ({pend.length})
-        <span style={{ fontSize: 11, color: 'rgba(184,147,42,.55)', fontWeight: 400, marginLeft: 'auto' }}>{O[ME].name} antwortet</span>
+        ⏳ Pending Requests ({pend.length})
+        <span style={{ fontSize: 13, color: 'rgba(184,147,42,.55)', fontWeight: 400, marginLeft: 'auto' }}>{O[ME].name} responds</span>
       </div>
       {pend.map(req => {
         const myW = req.myWid  ? fw.find(w => w.id === req.myWid)    : null;
@@ -699,23 +699,23 @@ function Inbox({ reqs, slots, onAccept, onDecline }) {
         return (
           <div key={req.id} style={{ background: 'var(--navy)', border: '1px solid rgba(184,147,42,.25)', borderRadius: 10, padding: '12px 14px', marginBottom: 10 }}>
             <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--cream)', marginBottom: 10 }}>
-              {req.type === 'swap' && thW  && `⇄ Tausch-Anfrage von ${fromO.name}`}
-              {req.type === 'buy'  && tgW  && `💰 Kauf-Anfrage von ${fromO.name} für Ihre Woche`}
-              {req.type === 'sell' && myW  && `💸 Verkaufsangebot von ${fromO.name}`}
+              {req.type === 'swap' && thW  && `⇄ Swap request from ${fromO.name}`}
+              {req.type === 'buy'  && tgW  && `💰 Purchase request from ${fromO.name} for your week`}
+              {req.type === 'sell' && myW  && `💸 Sale offer from ${fromO.name}`}
             </div>
 
             {req.type === 'swap' && myW && thW && (
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 40px 1fr', alignItems: 'center', gap: 8, marginBottom: 10 }}>
                 <div style={{ background: fromO.bg, border: `1px solid ${fromO.c}`, borderRadius: 8, padding: '8px 10px' }}>
-                  <div style={{ fontSize: 10, color: fromO.c, fontWeight: 700 }}>VON {fromO.name.toUpperCase()}</div>
+                  <div style={{ fontSize: 12, color: fromO.c, fontWeight: 700 }}>FROM {fromO.name.toUpperCase()}</div>
                   <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--cream)' }}>{myW.slotShort} · W{myW.wn}</div>
-                  <div style={{ fontSize: 11, color: 'rgba(249,246,240,.45)' }}>{fmt(myW.start)}</div>
+                  <div style={{ fontSize: 13, color: 'rgba(249,246,240,.45)' }}>{fmt(myW.start)}</div>
                 </div>
                 <div style={{ textAlign: 'center', fontSize: 20, color: 'var(--gold)' }}>⇄</div>
                 <div style={{ background: O[ME].bg, border: `1px solid ${O[ME].c}`, borderRadius: 8, padding: '8px 10px' }}>
-                  <div style={{ fontSize: 10, color: O[ME].c, fontWeight: 700 }}>SIE GEBEN</div>
+                  <div style={{ fontSize: 12, color: O[ME].c, fontWeight: 700 }}>YOU GIVE</div>
                   <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--cream)' }}>{thW.slotShort} · W{thW.wn}</div>
-                  <div style={{ fontSize: 11, color: 'rgba(249,246,240,.45)' }}>{fmt(thW.start)}</div>
+                  <div style={{ fontSize: 13, color: 'rgba(249,246,240,.45)' }}>{fmt(thW.start)}</div>
                 </div>
               </div>
             )}
@@ -723,12 +723,12 @@ function Inbox({ reqs, slots, onAccept, onDecline }) {
             {req.type === 'buy' && tgW && (
               <div className="grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
                 <div style={{ background: O[ME].bg, border: `1px solid ${O[ME].c}`, borderRadius: 8, padding: '8px 10px' }}>
-                  <div style={{ fontSize: 10, color: O[ME].c, fontWeight: 700 }}>IHRE WOCHE</div>
+                  <div style={{ fontSize: 12, color: O[ME].c, fontWeight: 700 }}>YOUR WEEK</div>
                   <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--cream)' }}>{tgW.slotShort} · W{tgW.wn}</div>
-                  <div style={{ fontSize: 11, color: 'rgba(249,246,240,.45)' }}>{fmt(tgW.start)} – {fmt(tgW.end)}</div>
+                  <div style={{ fontSize: 13, color: 'rgba(249,246,240,.45)' }}>{fmt(tgW.start)} – {fmt(tgW.end)}</div>
                 </div>
                 <div style={{ background: '#051507', border: '1px solid var(--green)', borderRadius: 8, padding: '8px 10px' }}>
-                  <div style={{ fontSize: 10, color: 'var(--green)', fontWeight: 700 }}>SIE ERHALTEN</div>
+                  <div style={{ fontSize: 12, color: 'var(--green)', fontWeight: 700 }}>YOU RECEIVE</div>
                   <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--green)' }}>{eur(WP)}</div>
                 </div>
               </div>
@@ -737,12 +737,12 @@ function Inbox({ reqs, slots, onAccept, onDecline }) {
             {req.type === 'sell' && myW && (
               <div className="grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
                 <div style={{ background: fromO.bg, border: `1px solid ${fromO.c}`, borderRadius: 8, padding: '8px 10px' }}>
-                  <div style={{ fontSize: 10, color: fromO.c, fontWeight: 700 }}>ANGEBOT VON {fromO.name.toUpperCase()}</div>
+                  <div style={{ fontSize: 12, color: fromO.c, fontWeight: 700 }}>OFFER FROM {fromO.name.toUpperCase()}</div>
                   <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--cream)' }}>{myW.slotShort} · W{myW.wn}</div>
-                  <div style={{ fontSize: 11, color: 'rgba(249,246,240,.45)' }}>{fmt(myW.start)} – {fmt(myW.end)}</div>
+                  <div style={{ fontSize: 13, color: 'rgba(249,246,240,.45)' }}>{fmt(myW.start)} – {fmt(myW.end)}</div>
                 </div>
                 <div style={{ background: '#051507', border: '1px solid var(--green)', borderRadius: 8, padding: '8px 10px' }}>
-                  <div style={{ fontSize: 10, color: 'var(--green)', fontWeight: 700 }}>SIE ZAHLEN</div>
+                  <div style={{ fontSize: 12, color: 'var(--green)', fontWeight: 700 }}>YOU PAY</div>
                   <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--green)' }}>{eur(WP)}</div>
                 </div>
               </div>
@@ -750,10 +750,10 @@ function Inbox({ reqs, slots, onAccept, onDecline }) {
 
             <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
               <button onClick={() => onAccept(req)} style={{ padding: '8px 18px', borderRadius: 7, border: 'none', background: 'var(--green)', color: 'var(--navy)', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>
-                ✓ Annehmen
+                ✓ Accept
               </button>
               <button onClick={() => onDecline(req)} style={{ padding: '8px 18px', borderRadius: 7, border: '1px solid rgba(248,113,113,.5)', background: 'transparent', color: 'var(--red)', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>
-                ✕ Ablehnen
+                ✕ Decline
               </button>
             </div>
           </div>
@@ -771,7 +771,7 @@ function TxLog({ reqs, slots }) {
   return (
     <div style={{ background: 'var(--navy-mid)', borderRadius: 10, padding: '12px 16px', border: '1px solid rgba(249,246,240,.07)', marginBottom: 20 }}>
       <div style={{ fontWeight: 800, fontSize: 13, color: 'var(--cream)', marginBottom: 8, paddingBottom: 8, borderBottom: '1px solid rgba(249,246,240,.07)' }}>
-        📋 Transaktions-Verlauf
+        📋 Transaction History
       </div>
       {done2.map((r, i) => {
         const ok   = r.status === 'accepted';
@@ -779,7 +779,7 @@ function TxLog({ reqs, slots }) {
         const thW  = r.theirWid ? fw.find(w => w.id === r.theirWid) : null;
         const tgW  = r.tgtWid   ? fw.find(w => w.id === r.tgtWid)   : null;
         const toO  = r.toOwner  ? O[r.toOwner]                       : null;
-        const tl   = r.type === 'swap' ? 'Tausch' : r.type === 'buy' ? 'Kauf' : 'Verkauf';
+        const tl   = r.type === 'swap' ? 'Swap' : r.type === 'buy' ? 'Purchase' : 'Sale';
         let txt = '';
         if (r.type === 'swap' && myW && thW) txt = `${myW.slotShort} W${myW.wn} ⇄ ${O[r.toOwner]?.name || r.toOwner} ${thW.slotShort} W${thW.wn}`;
         if (r.type === 'buy'  && tgW)        txt = `${tgW.slotShort} W${tgW.wn} · ${eur(WP)}`;
@@ -787,10 +787,10 @@ function TxLog({ reqs, slots }) {
         return (
           <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0', borderBottom: '1px solid rgba(249,246,240,.05)' }}>
             <Pill bg={ok ? '#071507' : '#200A0A'} color={ok ? 'var(--green)' : 'var(--red)'}>
-              {ok ? `✓ ${tl}` : `✕ ${tl} abgelehnt`}
+              {ok ? `✓ ${tl}` : `✕ ${tl} declined`}
             </Pill>
             <span style={{ fontSize: 12, color: 'rgba(249,246,240,.5)' }}>{txt}</span>
-            <span style={{ fontSize: 10, color: 'rgba(249,246,240,.2)', marginLeft: 'auto' }}>{r.fromOwner}→{r.toOwner}</span>
+            <span style={{ fontSize: 12, color: 'rgba(249,246,240,.2)', marginLeft: 'auto' }}>{r.fromOwner}→{r.toOwner}</span>
           </div>
         );
       })}
@@ -807,8 +807,8 @@ function Overview({ slots }) {
         return (
           <div key={y} style={{ background: 'var(--navy-mid)', borderRadius: 12, padding: '16px 18px', border: '1px solid rgba(184,147,42,.15)', marginBottom: 20 }}>
             <div style={{ fontWeight: 800, fontSize: 15, color: 'var(--gold)', marginBottom: 14, paddingBottom: 10, borderBottom: '1px solid rgba(184,147,42,.15)', display: 'flex', justifyContent: 'space-between' }}>
-              📅 Jahr {y}
-              <span style={{ fontSize: 12, color: 'rgba(249,246,240,.3)', fontWeight: 400 }}>EU {ey} · Karibik {ey}–{ey+1}</span>
+              📅 Year {y}
+              <span style={{ fontSize: 12, color: 'rgba(249,246,240,.3)', fontWeight: 400 }}>Mediterranean {ey} · Caribbean {ey}–{ey+1}</span>
             </div>
             <div className="grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 14 }}>
               {['A','B','C'].map(ow => {
@@ -822,22 +822,22 @@ function Overview({ slots }) {
                   <div key={ow} style={{ border: `1.5px solid ${o.c}33`, borderRadius: 10, overflow: 'hidden' }}>
                     <div style={{ background: o.c + '1A', borderBottom: `1px solid ${o.c}44`, padding: '9px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <span style={{ color: o.c, fontWeight: 800, fontSize: 14 }}>{o.name}</span>
-                      <span style={{ background: o.c + '33', color: o.c, borderRadius: 20, padding: '1px 9px', fontSize: 11, fontWeight: 700 }}>{myW.length}W</span>
+                      <span style={{ background: o.c + '33', color: o.c, borderRadius: 20, padding: '1px 9px', fontSize: 13, fontWeight: 700 }}>{myW.length}W</span>
                     </div>
                     <div style={{ padding: '10px 12px' }}>
                       {['EU','KAR'].map(type => (
                         <div key={type} style={{ marginBottom: 8 }}>
-                          <div style={{ fontSize: 10, fontWeight: 700, marginBottom: 4, color: type === 'EU' ? 'var(--green)' : 'var(--blue)', display: 'flex', alignItems: 'center', gap: 3 }}>
+                          <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 4, color: type === 'EU' ? 'var(--green)' : 'var(--blue)', display: 'flex', alignItems: 'center', gap: 3 }}>
                             <div style={{ width: 6, height: 6, borderRadius: '50%', background: type === 'EU' ? 'var(--green)' : 'var(--blue)' }} />
-                            {type === 'EU' ? 'Mittelmeer' : 'Karibik'}
+                            {type === 'EU' ? 'Mediterranean' : 'Caribbean'}
                           </div>
                           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
                             {mySl.filter(s => s.type === type).map(sl => (
                               <div key={sl.id} style={{ background: o.bg, borderRadius: 5, padding: '3px 7px', border: `1px solid ${o.c}22` }}>
-                                <div style={{ fontWeight: 700, fontSize: 9, color: o.c }}>{sl.prem ? '★ ' : ''}{sl.slabel}</div>
+                                <div style={{ fontWeight: 700, fontSize: 13, color: o.c }}>{sl.prem ? '★ ' : ''}{sl.slabel}</div>
                                 <div style={{ display: 'flex', gap: 2, marginTop: 1 }}>
                                   {sl.weeks.map(w => (
-                                    <div key={w.id} title={`W${w.wn}: ${w.status || 'offen'}`}
+                                    <div key={w.id} title={`W${w.wn}: ${w.status || 'open'}`}
                                       style={{ width: 7, height: 7, borderRadius: 1, background: w.status === 'use' ? 'var(--green)' : w.status === 'charter' ? 'var(--blue)' : 'rgba(249,246,240,.12)' }} />
                                   ))}
                                 </div>
@@ -849,8 +849,8 @@ function Overview({ slots }) {
                       <div style={{ background: 'rgba(249,246,240,.03)', borderRadius: 7, padding: '6px 8px', display: 'flex', gap: 8, marginTop: 4, flexWrap: 'wrap' }}>
                         {[['✓', use, 'var(--green)'], ['⛵', ch, 'var(--blue)'], ['○', op, 'rgba(249,246,240,.3)']].map(([l, v, c]) => (
                           <div key={l} style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-                            <span style={{ fontSize: 10, color: 'rgba(249,246,240,.35)' }}>{l}</span>
-                            <span style={{ fontSize: 10, fontWeight: 700, color: c }}>{v}W</span>
+                            <span style={{ fontSize: 12, color: 'rgba(249,246,240,.35)' }}>{l}</span>
+                            <span style={{ fontSize: 12, fontWeight: 700, color: c }}>{v}W</span>
                           </div>
                         ))}
                       </div>
@@ -880,17 +880,17 @@ function Header({ pendingCount, onReset }) {
       }}>
         <div style={{ maxWidth: 1060, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
           <div>
-            <div style={{ color: 'var(--gold)', fontWeight: 800, fontSize: 9, letterSpacing: 3, marginBottom: 2, opacity: .7 }}>
-              PRIVATE YACHT CLUB · NUTZUNGSPLANER
+            <div style={{ color: 'var(--gold)', fontWeight: 800, fontSize: 13, letterSpacing: 3, marginBottom: 2, opacity: .7 }}>
+              PRIVATE YACHT CLUB · USAGE PLANNER
             </div>
             <h1 style={{ color: 'var(--cream)', fontSize: 17, fontWeight: 800, margin: 0 }}>Explorer Yacht · 50m</h1>
-            <div style={{ color: 'rgba(249,246,240,.3)', fontSize: 10, marginTop: 1 }}>Montenegro · Mittelmeer & Karibik</div>
+            <div style={{ color: 'rgba(249,246,240,.3)', fontSize: 12, marginTop: 1 }}>Montenegro · Mediterranean & Caribbean</div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
             <button onClick={onReset} style={{
               padding: '5px 12px', borderRadius: 6,
               border: '1px solid rgba(249,246,240,.12)', background: 'transparent',
-              color: 'rgba(249,246,240,.35)', fontSize: 10, fontWeight: 600
+              color: 'rgba(249,246,240,.35)', fontSize: 12, fontWeight: 600
             }}>↺ Reset</button>
             {/* Owner switcher */}
             <div style={{ display: 'flex', gap: 4 }}>
@@ -914,7 +914,7 @@ function Header({ pendingCount, onReset }) {
                         background: ow.c, color: 'var(--navy)',
                         borderRadius: '50%', width: 18, height: 18,
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: 10, fontWeight: 900
+                        fontSize: 12, fontWeight: 900
                       }}>{pendingForOwner}</span>
                     )}
                   </a>
@@ -946,8 +946,8 @@ function Header({ pendingCount, onReset }) {
             <div style={{ color: me.c, fontWeight: 800, fontSize: 15, lineHeight: 1.2 }}>
               {me.name}
             </div>
-            <div style={{ color: 'rgba(249,246,240,.45)', fontSize: 11, marginTop: 2 }}>
-              Sie sind jetzt als <b style={{ color: me.c }}>{me.name}</b> angemeldet · Live-Sync alle 3 Sek.
+            <div style={{ color: 'rgba(249,246,240,.45)', fontSize: 13, marginTop: 2 }}>
+              You are now logged in as <b style={{ color: me.c }}>{me.name}</b> · Live-Sync every 3 sec.
             </div>
           </div>
           {/* Pending badge if any */}
@@ -959,7 +959,7 @@ function Header({ pendingCount, onReset }) {
               display: 'flex', alignItems: 'center', gap: 6,
             }}>
               <span style={{ fontSize: 16 }}>⏳</span>
-              {pendingCount} offene Anfrage{pendingCount > 1 ? 'n' : ''} warten
+              {pendingCount} pending request{pendingCount > 1 ? 's' : ''} waiting
             </div>
           )}
         </div>
@@ -1025,9 +1025,9 @@ function App() {
       body: JSON.stringify({ owner: ME, status: week.status === action ? null : action })
     });
     const d = await r.json();
-    if (!d.ok) { notify('Fehler: ' + d.error, 'var(--red)'); return; }
+    if (!d.ok) { notify('Error: ' + d.error, 'var(--red)'); return; }
     await fetchState();
-    notify(action === 'use' ? '✓ Als eigene Nutzung markiert' : '⛵ Für Charter freigegeben');
+    notify(action === 'use' ? '✓ Marked as personal use' : '⛵ Released for charter');
   };
 
   const sendSwap = async (myW, thW) => {
@@ -1037,9 +1037,9 @@ function App() {
       body: JSON.stringify({ type: 'swap', fromOwner: ME, myWid: myW.id, theirWid: thW.id })
     });
     const d = await r.json();
-    if (!d.ok) { notify('Fehler: ' + d.error, 'var(--red)'); return; }
+    if (!d.ok) { notify('Error: ' + d.error, 'var(--red)'); return; }
     await fetchState();
-    notify(`⇄ Tausch-Anfrage an ${O[thW.owner].name} gesendet`);
+    notify(`⇄ Swap request sent to ${O[thW.owner].name}`);
   };
 
   const sendBuy = async (tgW) => {
@@ -1049,9 +1049,9 @@ function App() {
       body: JSON.stringify({ type: 'buy', fromOwner: ME, tgtWid: tgW.id })
     });
     const d = await r.json();
-    if (!d.ok) { notify('Fehler: ' + d.error, 'var(--red)'); return; }
+    if (!d.ok) { notify('Error: ' + d.error, 'var(--red)'); return; }
     await fetchState();
-    notify(`💰 Kauf-Anfrage an ${O[tgW.owner].name} gesendet`);
+    notify(`💰 Purchase request sent to ${O[tgW.owner].name}`);
   };
 
   const sendSell = async (myW, toOwner) => {
@@ -1061,9 +1061,9 @@ function App() {
       body: JSON.stringify({ type: 'sell', fromOwner: ME, toOwner, myWid: myW.id })
     });
     const d = await r.json();
-    if (!d.ok) { notify('Fehler: ' + d.error, 'var(--red)'); return; }
+    if (!d.ok) { notify('Error: ' + d.error, 'var(--red)'); return; }
     await fetchState();
-    notify(`💸 Verkaufsangebot an ${O[toOwner].name} gesendet`);
+    notify(`💸 Sale offer sent to ${O[toOwner].name}`);
   };
 
   const acceptReq = async (req) => {
@@ -1073,9 +1073,9 @@ function App() {
       body: JSON.stringify({ owner: ME, decision: 'accepted' })
     });
     const d = await r.json();
-    if (!d.ok) { notify('Fehler: ' + d.error, 'var(--red)'); return; }
+    if (!d.ok) { notify('Error: ' + d.error, 'var(--red)'); return; }
     await fetchState();
-    notify('✓ Anfrage angenommen', 'var(--green)');
+    notify('✓ Request accepted', 'var(--green)');
   };
 
   const declineReq = async (req) => {
@@ -1085,9 +1085,9 @@ function App() {
       body: JSON.stringify({ owner: ME, decision: 'declined' })
     });
     const d = await r.json();
-    if (!d.ok) { notify('Fehler: ' + d.error, 'var(--red)'); return; }
+    if (!d.ok) { notify('Error: ' + d.error, 'var(--red)'); return; }
     await fetchState();
-    notify('✕ Anfrage abgelehnt', 'var(--red)');
+    notify('✕ Request declined', 'var(--red)');
   };
 
   const slots       = buildSlots(weeks);
@@ -1097,7 +1097,7 @@ function App() {
   if (!weeks.length) {
     return (
       <div style={{ color: 'var(--gold)', padding: 60, textAlign: 'center', fontSize: 16, letterSpacing: 2 }}>
-        LÄDT…
+        LOADING…
       </div>
     );
   }
@@ -1122,7 +1122,7 @@ function App() {
         await fetch('/api/reset', { method: 'POST' });
         await fetchState();
         setExp(null);
-        notify('↺ Alles zurückgesetzt');
+        notify('↺ All data reset');
       }} />
 
       <div style={{ maxWidth: 1060, margin: '0 auto', padding: '0 20px 60px' }}>
@@ -1139,22 +1139,22 @@ function App() {
           return (
             <div style={{ background: 'var(--navy-mid)', borderRadius: 10, padding: '12px 16px', border: '1px solid rgba(122,184,212,.2)', marginBottom: 20 }}>
               <div style={{ fontWeight: 800, fontSize: 13, marginBottom: 10, paddingBottom: 8, borderBottom: '1px solid rgba(122,184,212,.12)', color: 'var(--blue)' }}>
-                ⛵ Für Charter freigegebene Wochen ({cw.length}W)
+                ⛵ Weeks released for charter ({cw.length}W)
               </div>
               <div className="charter-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 7, marginBottom: 10 }}>
                 {cw.map(w => (
                   <div key={w.id} style={{ background: 'rgba(122,184,212,.06)', border: '1px solid rgba(122,184,212,.2)', borderRadius: 7, padding: '9px 10px' }}>
-                    <div style={{ fontWeight: 700, fontSize: 11, color: 'var(--blue)' }}>{w.slotShort} W{w.wn}</div>
-                    <div style={{ fontSize: 10, color: 'rgba(249,246,240,.35)' }}>{w.type === 'EU' ? 'Mittelmeer' : 'Karibik'}</div>
-                    <div style={{ fontSize: 11, color: 'rgba(249,246,240,.55)', marginTop: 2 }}>{fmt(w.start)}</div>
-                    <div style={{ fontWeight: 700, color: 'var(--blue)', fontSize: 12, marginTop: 2 }}>ca. {eur(CR)}</div>
+                    <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--blue)' }}>{w.slotShort} W{w.wn}</div>
+                    <div style={{ fontSize: 12, color: 'rgba(249,246,240,.35)' }}>{w.type === 'EU' ? 'Mediterranean' : 'Caribbean'}</div>
+                    <div style={{ fontSize: 13, color: 'rgba(249,246,240,.55)', marginTop: 2 }}>{fmt(w.start)}</div>
+                    <div style={{ fontWeight: 700, color: 'var(--blue)', fontSize: 12, marginTop: 2 }}>approx. {eur(CR)}</div>
                   </div>
                 ))}
               </div>
               <div style={{ background: 'rgba(122,184,212,.06)', border: '1px solid rgba(122,184,212,.15)', borderRadius: 7, padding: '9px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
-                  <div style={{ fontWeight: 700, color: 'var(--blue)', fontSize: 12 }}>Netto-Erlös (65% nach Broker + Management)</div>
-                  <div style={{ fontSize: 10, color: 'rgba(122,184,212,.5)' }}>{cw.length}W × {eur(CR)} × 65%</div>
+                  <div style={{ fontWeight: 700, color: 'var(--blue)', fontSize: 12 }}>Net revenue (65% after broker + management)</div>
+                  <div style={{ fontSize: 12, color: 'rgba(122,184,212,.5)' }}>{cw.length}W × {eur(CR)} × 65%</div>
                 </div>
                 <div style={{ fontWeight: 800, color: 'var(--blue)', fontSize: 18 }}>{eur(cw.length * CR * .65)}</div>
               </div>
@@ -1165,7 +1165,7 @@ function App() {
         {/* Tab bar + year filter */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: 10 }}>
           <div style={{ display: 'flex', gap: 6 }}>
-            {[['cal','📅 Kalender'],['over','👥 Jahresübersicht']].map(([k, l]) => (
+            {[['cal','📅 Calendar'],['over','👥 Year Overview']].map(([k, l]) => (
               <button key={k} onClick={() => setTab(k)} style={{
                 padding: '8px 16px', borderRadius: 20,
                 border: `2px solid ${tab === k ? 'var(--gold)' : 'rgba(249,246,240,.12)'}`,
@@ -1177,7 +1177,7 @@ function App() {
           </div>
           {tab === 'cal' && (
             <div style={{ display: 'flex', gap: 5 }}>
-              {[['all','Alle'],['1','Jahr 1'],['2','Jahr 2'],['3','Jahr 3']].map(([k, l]) => (
+              {[['all','All'],['1','Year 1'],['2','Year 2'],['3','Year 3']].map(([k, l]) => (
                 <button key={k} onClick={() => setYr(k)} style={{
                   padding: '6px 12px', borderRadius: 20,
                   background: yr === k ? 'rgba(184,147,42,.15)' : 'transparent',
@@ -1194,8 +1194,8 @@ function App() {
         {tab === 'cal' && (
           <div style={{ display: 'flex', gap: 6, marginBottom: 16 }}>
             {[
-              [false, 'Meine Wochen'],
-              [true,  'Alle anzeigen'],
+              [false, 'My Weeks'],
+              [true,  'Show All'],
             ].map(([val, label]) => (
               <button key={label}
                 onClick={() => { setShowAll(val); if (!val) setExp(null); }}
@@ -1234,11 +1234,11 @@ function App() {
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center'
               }}>
                 <div>
-                  <div style={{ color: 'var(--gold)', fontWeight: 800, fontSize: 16 }}>Jahr {y}</div>
-                  <div style={{ color: 'rgba(249,246,240,.35)', fontSize: 12 }}>Mittelmeer {ey} · Karibik {ey}–{ey+1}</div>
+                  <div style={{ color: 'var(--gold)', fontWeight: 800, fontSize: 16 }}>Year {y}</div>
+                  <div style={{ color: 'rgba(249,246,240,.35)', fontSize: 12 }}>Mediterranean {ey} · Caribbean {ey}–{ey+1}</div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ color: 'rgba(249,246,240,.35)', fontSize: 11 }}>Ihre Wochen</div>
+                  <div style={{ color: 'rgba(249,246,240,.35)', fontSize: 13 }}>Your Weeks</div>
                   <div style={{ color: 'var(--gold)', fontWeight: 800, fontSize: 20 }}>{myCount}W</div>
                 </div>
               </div>
@@ -1247,8 +1247,8 @@ function App() {
               <div style={{ marginBottom: 16 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 10, paddingBottom: 8, borderBottom: '1px solid rgba(134,239,172,.12)' }}>
                   <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--green)' }} />
-                  <span style={{ fontWeight: 700, fontSize: 13, color: 'var(--green)' }}>Mittelmeer · {ey}</span>
-                  <span style={{ fontSize: 10, color: 'rgba(249,246,240,.25)', marginLeft: 'auto' }}>Slot anklicken → Wochen planen</span>
+                  <span style={{ fontWeight: 700, fontSize: 13, color: 'var(--green)' }}>Mediterranean · {ey}</span>
+                  <span style={{ fontSize: 12, color: 'rgba(249,246,240,.25)', marginLeft: 'auto' }}>Tap slot → plan weeks</span>
                 </div>
                 <div className="grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 10 }}>
                   {eu.map(s => (
@@ -1270,8 +1270,8 @@ function App() {
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 10, paddingBottom: 8, borderBottom: '1px solid rgba(122,184,212,.12)' }}>
                   <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--blue)' }} />
-                  <span style={{ fontWeight: 700, fontSize: 13, color: 'var(--blue)' }}>Karibik · {ey}–{ey+1}</span>
-                  <span style={{ fontSize: 10, color: 'rgba(249,246,240,.25)', marginLeft: 'auto' }}>Slot anklicken → Wochen planen</span>
+                  <span style={{ fontWeight: 700, fontSize: 13, color: 'var(--blue)' }}>Caribbean · {ey}–{ey+1}</span>
+                  <span style={{ fontSize: 12, color: 'rgba(249,246,240,.25)', marginLeft: 'auto' }}>Tap slot → plan weeks</span>
                 </div>
                 <div className="grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 10 }}>
                   {kar.map(s => (
@@ -1294,21 +1294,21 @@ function App() {
 
         {/* Legend */}
         <div style={{ background: 'var(--navy-mid)', borderRadius: 9, padding: '10px 16px', display: 'flex', gap: 14, flexWrap: 'wrap', border: '1px solid rgba(249,246,240,.05)', marginTop: 8 }}>
-          <span style={{ fontSize: 11, color: 'rgba(249,246,240,.25)', fontWeight: 700 }}>LEGENDE:</span>
+          <span style={{ fontSize: 13, color: 'rgba(249,246,240,.25)', fontWeight: 700 }}>LEGEND:</span>
           {[
-            [O.A.c, '● Eigentümer A'],
-            [O.B.c, '● Eigentümer B'],
-            [O.C.c, '● Eigentümer C'],
-            ['var(--green)',  '✓ Genutzt'],
+            [O.A.c, '● Owner A'],
+            [O.B.c, '● Owner B'],
+            [O.C.c, '● Owner C'],
+            ['var(--green)',  '✓ In use'],
             ['var(--blue)',   '⛵ Charter'],
-            ['var(--purple)', '⇄ Getauscht'],
-            ['var(--gold)',   '💰 Zugekauft'],
-            ['var(--red)',    '💸 Verkauft'],
-            ['var(--gold)',   '⏳ Anfrage'],
+            ['var(--purple)', '⇄ Swapped'],
+            ['var(--gold)',   '💰 Purchased'],
+            ['var(--red)',    '💸 Sold'],
+            ['var(--gold)',   '⏳ Request'],
           ].map(([c, l]) => (
             <div key={l} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
               <div style={{ width: 8, height: 8, borderRadius: '50%', background: c }} />
-              <span style={{ fontSize: 11, color: 'rgba(249,246,240,.4)' }}>{l}</span>
+              <span style={{ fontSize: 13, color: 'rgba(249,246,240,.4)' }}>{l}</span>
             </div>
           ))}
         </div>
