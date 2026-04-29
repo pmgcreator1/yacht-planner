@@ -158,13 +158,15 @@ app.post('/api/requests', (req, res) => {
     const mw = wmap[myWid];
     if (!mw) return res.status(400).json({ ok: false, error: 'Week not found' });
     if (mw.owner !== fromOwner) return res.status(403).json({ ok: false, error: 'You do not own this week' });
-    if (toOwner === fromOwner) return res.status(400).json({ ok: false, error: 'Cannot sell to yourself' });
-    if (!['A','B','C'].includes(toOwner)) return res.status(400).json({ ok: false, error: 'Invalid toOwner' });
     if (isLocked(db, myWid)) return res.status(400).json({ ok: false, error: 'Week is locked by a pending request' });
-    const newReq = { id: `req_${Date.now()}`, type: 'sell', fromOwner, toOwner, myWid, theirWid: null, tgtWid: null, status: 'pending', createdAt: new Date().toISOString(), resolvedAt: null };
-    db.requests.push(newReq);
+    const now = new Date().toISOString();
+    const newReqs = ['A','B','C'].filter(o => o !== fromOwner).map(tO => ({
+      id: `req_${Date.now()}_${tO}`, type: 'sell', fromOwner, toOwner: tO,
+      myWid, theirWid: null, tgtWid: null, status: 'pending', createdAt: now, resolvedAt: null
+    }));
+    newReqs.forEach(r => db.requests.push(r));
     saveDb(db);
-    return res.status(201).json({ ok: true, request: newReq });
+    return res.status(201).json({ ok: true, requests: newReqs });
   }
 });
 
@@ -204,6 +206,13 @@ app.post('/api/requests/:id/respond', (req, res) => {
       if (mw.owner !== reqObj.fromOwner) return res.status(400).json({ ok: false, error: 'Week ownership has changed since this request was created' });
       mw.owner = reqObj.toOwner; mw.status = null;
       affectedWeeks.push(mw);
+      // Cancel the sibling broadcast requests (other owners who didn't accept in time)
+      const resolvedAt = new Date().toISOString();
+      db.requests.forEach(r => {
+        if (r.id !== reqObj.id && r.type === 'sell' && r.myWid === reqObj.myWid && r.status === 'pending') {
+          r.status = 'declined'; r.resolvedAt = resolvedAt;
+        }
+      });
     }
   }
 
