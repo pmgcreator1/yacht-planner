@@ -62,26 +62,11 @@ function buildWeeks() {
   return weeks;
 }
 
-const DEMO_STATUS_OVERRIDES = {
-  "eu1_4_w1": { status: "use" },
-  "eu1_4_w2": { status: "charter" },
-  "eu1_5_w2": { status: "use" },
-  "kar1_2_w1": { status: "use" },
-  "eu2_1_w3": { status: "charter" },
-};
+const DEMO_STATUS_OVERRIDES = {};
 
-const DEMO_OWNER_OVERRIDES = {
-  "eu2_2_w1": "C",
-  "kar2_1_w2": "B",
-};
+const DEMO_OWNER_OVERRIDES = {};
 
-const DEMO_REQUESTS = [
-  { id:"req_demo_1", type:"swap", fromOwner:"A", toOwner:"B", myWid:"eu1_1_w2", theirWid:"eu1_5_w1", tgtWid:null, status:"pending", createdAt:"2026-04-20T10:30:00.000Z", resolvedAt:null },
-  { id:"req_demo_2", type:"buy",  fromOwner:"C", toOwner:"A", myWid:null, theirWid:null, tgtWid:"kar1_3_w2", status:"pending", createdAt:"2026-04-22T14:00:00.000Z", resolvedAt:null },
-  { id:"req_demo_3", type:"sell", fromOwner:"B", toOwner:"C", myWid:"kar1_1_w3", theirWid:null, tgtWid:null, status:"pending", createdAt:"2026-04-23T08:00:00.000Z", resolvedAt:null },
-  { id:"req_demo_4", type:"swap", fromOwner:"B", toOwner:"C", myWid:"eu2_2_w1", theirWid:"kar2_1_w2", tgtWid:null, status:"accepted", createdAt:"2026-03-10T11:00:00.000Z", resolvedAt:"2026-03-12T09:00:00.000Z" },
-  { id:"req_demo_5", type:"buy",  fromOwner:"A", toOwner:"C", myWid:null, theirWid:null, tgtWid:"eu3_3_w1", status:"declined", createdAt:"2026-02-15T16:00:00.000Z", resolvedAt:"2026-02-16T10:00:00.000Z" },
-];
+const DEMO_REQUESTS = [];
 
 function buildInitialState() {
   const weeks = buildWeeks().map(w => {
@@ -99,7 +84,7 @@ function buildInitialState() {
 const INITIAL_STATE = buildInitialState();
 
 // In-memory database (works locally and on Vercel).
-// On Vercel serverless, state resets on cold start → demo seed always available.
+// On Vercel serverless, state resets on cold start → always starts from INITIAL_STATE.
 // For persistent multi-user state, replace with Vercel KV or Upstash Redis.
 let db = JSON.parse(JSON.stringify(INITIAL_STATE));
 
@@ -231,7 +216,7 @@ app.post('/api/requests/:id/respond', (req, res) => {
 app.post('/api/reset', (req, res) => {
   db = JSON.parse(JSON.stringify(INITIAL_STATE));
   saveDb(db);
-  res.json({ ok: true, message: 'Demo state restored' });
+  res.json({ ok: true, message: 'State reset to initial' });
 });
 
 app.use((err, req, res, next) => {
