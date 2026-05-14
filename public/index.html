@@ -15,10 +15,10 @@
   --gold:      #B8932A;
   --gold-lt:   #D4AF6A;
   --cream:     #F9F6F0;
-  --green:     #86efac;
-  --blue:      #7AB8D4;
-  --red:       #f87171;
-  --purple:    #C4B5FD;
+  --green:     #7AB89A;
+  --blue:      #6AA0BA;
+  --red:       #C48888;
+  --purple:    #9888B8;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: system-ui, -apple-system, sans-serif; background: var(--navy); color: var(--cream); min-height: 100vh; }
@@ -87,13 +87,13 @@ const { useState, useEffect, useCallback, useRef } = React;
 
 // ── CONFIG ─────────────────────────────────────────────────────────────────────
 const YEAR0 = 2026;
-const WP = 250000;
+const WP = 245000;
 const CR = 325000;
 
 const O = {
-  A: { name: "Owner A", label: "A", c: "#F5A623", bg: "#201500", bd: "#F5A62355", emoji: "🟡" },
-  B: { name: "Owner B", label: "B", c: "#4F9EF0", bg: "#001525", bd: "#4F9EF055", emoji: "🔵" },
-  C: { name: "Owner C", label: "C", c: "#D87FED", bg: "#160020", bd: "#D87FED55", emoji: "🟣" },
+  A: { name: "Owner A", label: "A", c: "#F0EBE1", bg: "#1A1A24", bd: "#F0EBE133", emoji: "⬜" },
+  B: { name: "Owner B", label: "B", c: "#7FA8C4", bg: "#0C1E2C", bd: "#7FA8C433", emoji: "◻" },
+  C: { name: "Owner C", label: "C", c: "#A888C0", bg: "#180E22", bd: "#A888C033", emoji: "◻" },
 };
 
 const EQ = {1:"Early Season",2:"Early Summer",3:"High Season",4:"★ HIGH SUMMER",5:"★ HIGH SUMMER",6:"Late Season"};
@@ -179,9 +179,9 @@ function WeekCard({ week, slots, reqs, onAction }) {
   const WLABELS = ['Week 1', 'Week 2', 'Week 3'];
 
   const accentColor = locked ? 'var(--gold)' : ow.c;
-  const statusBg    = locked ? ow.c + '22' : isUse ? '#14532d55' : isCh ? '#1e3a5f55' : 'rgba(249,246,240,.06)';
-  const statusColor = locked ? 'var(--gold)' : isUse ? '#86efac' : isCh ? '#7AB8D4' : 'rgba(249,246,240,.45)';
-  const statusIcon  = locked ? (pend ? '⏳' : '✓') : isUse ? '✓' : isCh ? '⛵' : '○';
+  const statusBg    = locked ? ow.c + '22' : isUse ? '#0F332455' : isCh ? '#10203555' : 'rgba(249,246,240,.06)';
+  const statusColor = locked ? 'var(--gold)' : isUse ? '#7AB89A' : isCh ? '#6AA0BA' : 'rgba(249,246,240,.45)';
+  const statusIcon  = locked ? (pend ? '…' : '✓') : isUse ? '✓' : isCh ? '~' : '○';
 
   return (
     <div className="card-updated" style={{
@@ -225,31 +225,31 @@ function WeekCard({ week, slots, reqs, onAction }) {
             <>
               <button onClick={() => onAction(week, 'use')} style={{
                 flex: '1 1 80px', padding: '7px 4px', borderRadius: 6, fontWeight: 700, fontSize: 13,
-                border: `2px solid ${isUse ? '#86efac' : '#86efac44'}`,
-                background: isUse ? '#14532d' : 'transparent',
-                color: '#86efac'
+                border: `2px solid ${isUse ? '#7AB89A' : '#7AB89A44'}`,
+                background: isUse ? '#0F3324' : 'transparent',
+                color: '#7AB89A'
               }}>{isUse ? '✓ In use ↩' : '✓ Use'}</button>
               <button onClick={() => onAction(week, 'charter')} style={{
                 flex: '1 1 90px', padding: '7px 4px', borderRadius: 6, fontWeight: 700, fontSize: 13,
-                border: `2px solid ${isCh ? '#7AB8D4' : '#7AB8D444'}`,
-                background: isCh ? '#1e3a5f' : 'transparent',
-                color: '#7AB8D4'
-              }}>{isCh ? '⛵ Charter ↩' : '⛵ Charter'}</button>
+                border: `2px solid ${isCh ? '#6AA0BA' : '#6AA0BA44'}`,
+                background: isCh ? '#102035' : 'transparent',
+                color: '#6AA0BA'
+              }}>{isCh ? 'Charter ↩' : 'Charter'}</button>
               <button onClick={() => onAction(week, 'swap')} style={{
                 flex: '1 1 80px', padding: '7px 4px', borderRadius: 6, fontWeight: 700, fontSize: 13,
                 border: `2px solid var(--gold-lt)44`, background: 'transparent', color: 'var(--gold-lt)'
               }}>⇄ Swap</button>
               <button onClick={() => onAction(week, 'sell')} style={{
                 flex: '1 1 100px', padding: '7px 4px', borderRadius: 6, fontWeight: 700, fontSize: 13,
-                border: '2px solid #f8717144', background: 'transparent', color: '#f87171'
-              }}>💸 Sell</button>
+                border: '2px solid #C4888844', background: 'transparent', color: '#C48888'
+              }}>Sell</button>
             </>
           ) : (
             <button onClick={() => onAction(week, 'buy')} style={{
               width: '100%', padding: '8px 0', borderRadius: 6, fontWeight: 700, fontSize: 12,
               border: `2px solid ${ow.c}44`, background: 'transparent',
               color: ow.c
-            }}>💰 Buy week · {eur(WP)}</button>
+            }}>Buy week · {eur(WP)}</button>
           )}
         </div>
       )}
@@ -280,7 +280,7 @@ function SlotPanel({ slot, slots, reqs, onWeekAction, onClose }) {
           boxShadow: `0 0 0 3px ${ow.c}44`
         }}>{slot.origOwner}</div>
         <div style={{ flex: 1 }}>
-          <div style={{ color: ow.c, fontWeight: 800, fontSize: 18 }}>
+          <div style={{ color: ow.c, fontWeight: 700, fontSize: 18 }}>
             {slot.prem ? '★ ' : ''}{slot.label}
             <span style={{ fontWeight: 400, fontSize: 13, marginLeft: 12, opacity: .6, color: 'var(--cream)' }}>
               {fmts(slot.start)} – {fmts(slot.end)}
@@ -302,6 +302,204 @@ function SlotPanel({ slot, slots, reqs, onWeekAction, onClose }) {
             onAction={(w, action) => onWeekAction(w, action)} />
         ))}
       </div>
+    </div>
+  );
+}
+
+// ── SLOT CAL PANEL ───────────────────────────────────────────────────────────
+function SlotCalPanel({ slot, slots, reqs, onWeekAction, onClose }) {
+  const [selectedWkId, setSelectedWkId] = useState(null);
+  const ow = O[slot.origOwner];
+  const MN_FULL = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const DOW = ['M','T','W','T','F','S','S'];
+  const WLABELS = ['Week 1','Week 2','Week 3'];
+
+  const selectedWk = selectedWkId ? slot.weeks.find(w => w.id === selectedWkId) : null;
+
+  const startD = new Date(slot.start);
+  const endD   = new Date(slot.end);
+  const months = [];
+  let mCur = new Date(startD.getFullYear(), startD.getMonth(), 1);
+  const mLast = new Date(endD.getFullYear(), endD.getMonth(), 1);
+  while (mCur <= mLast) { months.push(new Date(mCur)); mCur = new Date(mCur.getFullYear(), mCur.getMonth() + 1, 1); }
+
+  const getDayWeek = (date) => {
+    if (!date) return null;
+    const iso = date.toISOString().slice(0, 10);
+    return slot.weeks.find(w => iso >= w.start && iso <= w.end) || null;
+  };
+
+  const MonthGrid = ({ month }) => {
+    const y = month.getFullYear(), m = month.getMonth();
+    const firstDow = (new Date(y, m, 1).getDay() + 6) % 7;
+    const daysInMonth = new Date(y, m + 1, 0).getDate();
+    const cells = [];
+    for (let i = 0; i < firstDow; i++) cells.push(null);
+    for (let d = 1; d <= daysInMonth; d++) cells.push(new Date(y, m, d));
+    return (
+      <div style={{ minWidth: 196, flex: '1 1 196px' }}>
+        <div style={{ fontWeight: 600, fontSize: 13, color: 'var(--gold)', marginBottom: 8, textAlign: 'center' }}>
+          {MN_FULL[m]} {y}
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 2 }}>
+          {DOW.map((d, i) => (
+            <div key={i} style={{ textAlign: 'center', fontSize: 10, color: 'rgba(249,246,240,.25)', fontWeight: 600, paddingBottom: 4 }}>{d}</div>
+          ))}
+          {cells.map((date, i) => {
+            const wk   = date ? getDayWeek(date) : null;
+            const isSel = wk && selectedWk && wk.id === selectedWk.id;
+            const bg = wk
+              ? (isSel ? ow.c : wk.status === 'use' ? ow.c : wk.status === 'charter' ? ow.c + '66' : ow.c + '30')
+              : 'transparent';
+            const tc = wk
+              ? (isSel || wk.status === 'use' ? 'var(--navy)' : ow.c)
+              : 'rgba(249,246,240,.2)';
+            return (
+              <div key={i}
+                onClick={() => wk && setSelectedWkId(isSel ? null : wk.id)}
+                style={{
+                  textAlign: 'center', fontSize: 11, padding: '5px 2px',
+                  background: bg, borderRadius: 3, color: tc,
+                  fontWeight: wk ? 600 : 400,
+                  cursor: wk ? 'pointer' : 'default',
+                  outline: isSel ? `2px solid ${ow.c}` : 'none',
+                  outlineOffset: 1,
+                }}>
+                {date ? date.getDate() : ''}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  const myCount = slot.weeks.filter(w => w.owner === ME).length;
+
+  return (
+    <div style={{
+      gridColumn: '1 / -1', background: 'var(--navy-mid)', borderRadius: 12,
+      border: `2px solid ${ow.c}`,
+      boxShadow: `0 8px 40px rgba(0,0,0,.5), 0 0 0 1px ${ow.c}33`,
+      overflow: 'hidden', marginTop: 6, marginBottom: 2
+    }}>
+      <div style={{ height: 6, background: ow.c }} />
+      <div style={{ background: ow.c + '18', borderBottom: `1px solid ${ow.c}44`, padding: '14px 20px', display: 'flex', alignItems: 'center', gap: 14 }}>
+        <div style={{
+          width: 44, height: 44, borderRadius: '50%',
+          background: ow.c, color: 'var(--navy)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontWeight: 900, fontSize: 20, flexShrink: 0,
+          boxShadow: `0 0 0 3px ${ow.c}44`
+        }}>{slot.origOwner}</div>
+        <div style={{ flex: 1 }}>
+          <div style={{ color: ow.c, fontWeight: 700, fontSize: 18 }}>
+            {slot.prem ? '★ ' : ''}{slot.label}
+            <span style={{ fontWeight: 400, fontSize: 13, marginLeft: 12, opacity: .6, color: 'var(--cream)' }}>
+              {fmts(slot.start)} – {fmts(slot.end)}
+            </span>
+          </div>
+          <div style={{ color: 'rgba(249,246,240,.5)', fontSize: 12, marginTop: 2 }}>
+            {slot.qual} · {slot.type === 'EU' ? 'Mediterranean' : 'Caribbean'} · {ow.name}
+            {myCount > 0 && <span style={{ marginLeft: 8, fontWeight: 700, color: ow.c }}>· {myCount}/3 weeks yours</span>}
+          </div>
+        </div>
+        <button onClick={onClose} style={{
+          background: 'transparent', border: `2px solid ${ow.c}`,
+          color: ow.c, borderRadius: 20, padding: '8px 20px', fontWeight: 700, fontSize: 13
+        }}>← Back</button>
+      </div>
+
+      {/* Calendar months */}
+      <div style={{ padding: '20px', display: 'flex', gap: 20, flexWrap: 'wrap', justifyContent: 'center' }}>
+        {months.map((month, i) => <MonthGrid key={i} month={month} />)}
+      </div>
+
+      {/* Week chips */}
+      <div style={{ padding: '0 20px 10px', display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+        {slot.weeks.map((w, i) => {
+          const isActive = selectedWk && selectedWk.id === w.id;
+          return (
+            <button key={w.id} onClick={() => setSelectedWkId(isActive ? null : w.id)} style={{
+              padding: '5px 12px', borderRadius: 20, fontWeight: 600, fontSize: 12,
+              border: `2px solid ${isActive ? ow.c : ow.c + '44'}`,
+              background: isActive ? ow.c + '33' : 'transparent',
+              color: isActive ? ow.c : ow.c + 'aa',
+            }}>
+              {WLABELS[i]} · {fmts(w.start)}
+            </button>
+          );
+        })}
+        {!selectedWk && (
+          <span style={{ fontSize: 11, color: 'rgba(249,246,240,.2)', marginLeft: 4 }}>
+            Select a week to see actions
+          </span>
+        )}
+      </div>
+
+      {/* Action panel */}
+      {selectedWk && (() => {
+        const w = selectedWk;
+        const isMine = w.owner === ME;
+        const pend  = pendingReq(reqs, w.id);
+        const doneR = doneReq(reqs, w.id);
+        const locked = !!(pend || doneR);
+        const isUse = w.status === 'use';
+        const isCh  = w.status === 'charter';
+        const wo = O[w.owner];
+        return (
+          <div style={{ padding: '0 20px 20px' }}>
+            <div style={{
+              background: wo.c + '12', border: `1px solid ${wo.c}33`, borderRadius: 8, padding: '12px 14px',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, flexWrap: 'wrap' }}>
+                <div style={{ width: 22, height: 22, borderRadius: '50%', background: wo.c, color: 'var(--navy)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 12 }}>{w.owner}</div>
+                <div style={{ fontWeight: 700, fontSize: 13, color: wo.c }}>{WLABELS[w.wn - 1]}</div>
+                <div style={{ fontSize: 12, color: 'rgba(249,246,240,.4)' }}>{fmt(w.start)} – {fmt(w.end)}</div>
+                {w.isPremium && <span style={{ color: 'var(--gold)', fontSize: 12 }}>★</span>}
+                <div style={{ marginLeft: 'auto', fontSize: 11, color: locked ? 'var(--gold)' : isUse ? 'var(--green)' : isCh ? 'var(--blue)' : 'rgba(249,246,240,.3)' }}>
+                  {locked ? (pend ? '… Pending' : '✓ Done') : isUse ? '✓ In use' : isCh ? 'Charter' : '○ Open'}
+                </div>
+              </div>
+              {locked ? (
+                <div style={{ fontSize: 12, color: 'var(--gold)', background: 'rgba(184,147,42,.08)', padding: '8px 12px', borderRadius: 6 }}>
+                  {pend ? 'A request is pending for this week.' : 'This week has a completed transaction.'}
+                </div>
+              ) : (
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                  {isMine ? (
+                    <>
+                      <button onClick={() => onWeekAction(w, 'use')} style={{
+                        flex: '1 1 80px', padding: '7px 4px', borderRadius: 6, fontWeight: 700, fontSize: 13,
+                        border: `2px solid ${isUse ? '#7AB89A' : '#7AB89A44'}`,
+                        background: isUse ? '#0F3324' : 'transparent', color: '#7AB89A'
+                      }}>{isUse ? '✓ In use ↩' : '✓ Use'}</button>
+                      <button onClick={() => onWeekAction(w, 'charter')} style={{
+                        flex: '1 1 90px', padding: '7px 4px', borderRadius: 6, fontWeight: 700, fontSize: 13,
+                        border: `2px solid ${isCh ? '#6AA0BA' : '#6AA0BA44'}`,
+                        background: isCh ? '#102035' : 'transparent', color: '#6AA0BA'
+                      }}>{isCh ? 'Charter ↩' : 'Charter'}</button>
+                      <button onClick={() => onWeekAction(w, 'swap')} style={{
+                        flex: '1 1 80px', padding: '7px 4px', borderRadius: 6, fontWeight: 700, fontSize: 13,
+                        border: `2px solid var(--gold-lt)44`, background: 'transparent', color: 'var(--gold-lt)'
+                      }}>⇄ Swap</button>
+                      <button onClick={() => onWeekAction(w, 'sell')} style={{
+                        flex: '1 1 100px', padding: '7px 4px', borderRadius: 6, fontWeight: 700, fontSize: 13,
+                        border: '2px solid #C4888844', background: 'transparent', color: '#C48888'
+                      }}>Sell</button>
+                    </>
+                  ) : (
+                    <button onClick={() => onWeekAction(w, 'buy')} style={{
+                      width: '100%', padding: '8px 0', borderRadius: 6, fontWeight: 700, fontSize: 12,
+                      border: `2px solid ${wo.c}44`, background: 'transparent', color: wo.c
+                    }}>Buy week · {eur(WP)}</button>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }
@@ -343,13 +541,13 @@ function SlotCard({ slot, reqs, expanded, onToggle }) {
         }}>{slot.origOwner}</div>
         {/* Label */}
         <div style={{ flex: 1 }}>
-          <div style={{ fontWeight: 800, color: hasWeeks ? ow.c : ow.c + 'aa', fontSize: 12 }}>
+          <div style={{ fontWeight: 700, color: hasWeeks ? ow.c : ow.c + 'aa', fontSize: 12 }}>
             {slot.prem ? '★ ' : ''}{slot.label}
           </div>
         </div>
         {/* Ownership badge */}
         {myW === 3 && (
-          <span style={{ background: ow.c + '33', color: ow.c, fontSize: 13, fontWeight: 800, borderRadius: 6, padding: '2px 7px', flexShrink: 0, border: `1px solid ${ow.c}55` }}>
+          <span style={{ background: ow.c + '33', color: ow.c, fontSize: 13, fontWeight: 700, borderRadius: 6, padding: '2px 7px', flexShrink: 0, border: `1px solid ${ow.c}55` }}>
             MY SLOT
           </span>
         )}
@@ -368,9 +566,9 @@ function SlotCard({ slot, reqs, expanded, onToggle }) {
                 title={p ? 'Pending' : d ? 'Completed' : w.status === 'use' ? 'In use' : w.status === 'charter' ? 'Charter' : 'Open'}
                 style={{
                   width: 10, height: 10, borderRadius: 3,
-                  background: p ? 'var(--gold)' : d ? '#C4B5FD'
-                    : w.status === 'use' ? '#86efac'
-                    : w.status === 'charter' ? '#7AB8D4'
+                  background: p ? 'var(--gold)' : d ? 'var(--purple)'
+                    : w.status === 'use' ? 'var(--green)'
+                    : w.status === 'charter' ? 'var(--blue)'
                     : 'rgba(249,246,240,.15)',
                   border: `1.5px solid rgba(249,246,240,.2)`,
                 }} />
@@ -389,10 +587,10 @@ function SlotCard({ slot, reqs, expanded, onToggle }) {
         </div>
         {hasWeeks && (
           <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-            {use  > 0 && <Pill bg="#14532d55" color="#86efac">{use}W ✓</Pill>}
-            {ch   > 0 && <Pill bg="#1e3a5f55" color="#7AB8D4">{ch}W ⛵</Pill>}
+            {use  > 0 && <Pill bg="#0F332455" color="var(--green)">{use}W ✓</Pill>}
+            {ch   > 0 && <Pill bg="#10203555" color="var(--blue)">{ch}W Charter</Pill>}
             {op   > 0 && <Pill bg={ow.c + '22'} color={ow.c}>{op}W ○</Pill>}
-            {anyP      && <Pill bg="rgba(184,147,42,.2)" color="var(--gold)">⏳</Pill>}
+            {anyP      && <Pill bg="rgba(184,147,42,.2)" color="var(--gold)">Pending</Pill>}
           </div>
         )}
       </div>
@@ -418,7 +616,7 @@ function SwapModal({ myWeek, slots, reqs, onSend, onClose }) {
       <div className="modal">
         <div style={{ background: 'linear-gradient(135deg, var(--gold) 0%, #8a6a1a 100%)', padding: '18px 24px', borderRadius: '12px 12px 0 0', display: 'flex', alignItems: 'center', gap: 12 }}>
           <div style={{ flex: 1, color: 'var(--navy)' }}>
-            <div style={{ fontWeight: 800, fontSize: 17 }}>Swap Week</div>
+            <div style={{ fontWeight: 700, fontSize: 17 }}>Swap Week</div>
             <div style={{ fontSize: 12, opacity: .8, marginTop: 2 }}>
               I offer: <b>{myWeek.slotShort} · W{myWeek.wn}</b> &nbsp; {fmt(myWeek.start)} – {fmt(myWeek.end)}
             </div>
@@ -429,7 +627,7 @@ function SwapModal({ myWeek, slots, reqs, onSend, onClose }) {
         <div style={{ padding: '20px 24px' }}>
           {/* My week */}
           <div style={{ background: O[ME].bg, border: `2px solid ${O[ME].c}`, borderRadius: 10, padding: '10px 16px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ background: O[ME].c, color: 'var(--navy)', borderRadius: '50%', width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 15 }}>{ME}</div>
+            <div style={{ background: O[ME].c, color: 'var(--navy)', borderRadius: '50%', width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 15 }}>{ME}</div>
             <div>
               <div style={{ fontSize: 12, color: O[ME].c, fontWeight: 700 }}>I OFFER</div>
               <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--cream)' }}>
@@ -479,7 +677,7 @@ function SwapModal({ myWeek, slots, reqs, onSend, onClose }) {
                       </div>
                     </div>
                     <div style={{ fontWeight: 700, fontSize: 12, color: ow.c, flexShrink: 0 }}>{ow.name}</div>
-                    {isSel && <div style={{ background: ow.c, color: 'var(--navy)', borderRadius: '50%', width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 12 }}>✓</div>}
+                    {isSel && <div style={{ background: ow.c, color: 'var(--navy)', borderRadius: '50%', width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 12 }}>✓</div>}
                   </div>
                 );
               })
@@ -495,7 +693,7 @@ function SwapModal({ myWeek, slots, reqs, onSend, onClose }) {
                 <span style={{ marginLeft: 8, fontWeight: 700, color: O[sel.owner].c, fontSize: 12 }}>from {O[sel.owner].name}</span>
               </div>
               <button onClick={() => { onSend(myWeek, sel); onClose(); }}
-                style={{ width: '100%', padding: 12, borderRadius: 8, border: 'none', background: 'var(--gold)', color: 'var(--navy)', fontWeight: 800, fontSize: 15, cursor: 'pointer' }}>
+                style={{ width: '100%', padding: 12, borderRadius: 8, border: 'none', background: 'var(--gold)', color: 'var(--navy)', fontWeight: 700, fontSize: 15, cursor: 'pointer' }}>
                 Send swap request →
               </button>
             </div>
@@ -518,7 +716,7 @@ function BuyModal({ week, onSend, onClose }) {
     <div className="modal-bg" onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="modal" style={{ maxWidth: 440 }}>
         <div style={{ background: ow.c + '22', borderBottom: `1px solid ${ow.c}`, padding: '16px 22px', borderRadius: '12px 12px 0 0' }}>
-          <div style={{ color: ow.c, fontWeight: 800, fontSize: 17 }}>Buy Week</div>
+          <div style={{ color: ow.c, fontWeight: 700, fontSize: 17 }}>Buy Week</div>
           <div style={{ color: 'rgba(249,246,240,.55)', fontSize: 12, marginTop: 2 }}>{week.slotShort} · W{week.wn} · {fmt(week.start)} – {fmt(week.end)}</div>
         </div>
         <div style={{ padding: '22px 24px' }}>
@@ -530,9 +728,9 @@ function BuyModal({ week, onSend, onClose }) {
               <div style={{ fontSize: 12, color: 'rgba(249,246,240,.5)' }}>to {fmt(week.end)}</div>
               <div style={{ fontSize: 13, color: ow.c, fontWeight: 700, marginTop: 6 }}>from {ow.name}</div>
             </div>
-            <div style={{ background: '#051507', border: '2px solid var(--green)', borderRadius: 10, padding: 14 }}>
+            <div style={{ background: '#071A12', border: '2px solid var(--green)', borderRadius: 10, padding: 14 }}>
               <div style={{ fontSize: 12, color: 'var(--green)', fontWeight: 700, marginBottom: 6 }}>PURCHASE PRICE</div>
-              <div style={{ fontSize: 28, fontWeight: 800, color: 'var(--green)' }}>{eur(WP)}</div>
+              <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--green)' }}>{eur(WP)}</div>
               <div style={{ fontSize: 13, color: 'rgba(249,246,240,.4)', marginTop: 4 }}>Fixed price</div>
             </div>
           </div>
@@ -562,15 +760,15 @@ function SellModal({ week, onSend, onClose }) {
   return (
     <div className="modal-bg" onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="modal" style={{ maxWidth: 440 }}>
-        <div style={{ background: 'rgba(248,113,113,.12)', borderBottom: '1px solid rgba(248,113,113,.4)', padding: '16px 22px', borderRadius: '12px 12px 0 0' }}>
-          <div style={{ color: 'var(--red)', fontWeight: 800, fontSize: 17 }}>Sell Week</div>
+        <div style={{ background: 'rgba(196,136,136,.12)', borderBottom: '1px solid rgba(196,136,136,.4)', padding: '16px 22px', borderRadius: '12px 12px 0 0' }}>
+          <div style={{ color: 'var(--red)', fontWeight: 700, fontSize: 17 }}>Sell Week</div>
           <div style={{ color: 'rgba(249,246,240,.55)', fontSize: 12, marginTop: 2 }}>{week.slotShort} · W{week.wn} · {fmt(week.start)} – {fmt(week.end)}</div>
         </div>
         <div style={{ padding: '22px 24px' }}>
           <div style={{ fontSize: 13, color: 'var(--cream)', marginBottom: 16 }}>
             Price: <b style={{ color: 'var(--gold)' }}>{eur(WP)}</b>. The offer will be sent to all other owners simultaneously — whoever accepts first gets the week.
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18, padding: '10px 14px', background: 'rgba(248,113,113,.08)', border: '1px solid rgba(248,113,113,.3)', borderRadius: 8, cursor: 'pointer' }}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18, padding: '10px 14px', background: 'rgba(196,136,136,.08)', border: '1px solid rgba(196,136,136,.3)', borderRadius: 8, cursor: 'pointer' }}
             onClick={() => setOk(v => !v)}>
             <input type="checkbox" checked={ok} onChange={e => setOk(e.target.checked)} style={{ width: 18, height: 18, cursor: 'pointer', accentColor: 'var(--red)' }} />
             <label style={{ fontSize: 12, color: 'var(--red)', cursor: 'pointer', fontWeight: 600 }}>I confirm the sale offer for {eur(WP)}.</label>
@@ -615,10 +813,10 @@ function Tabelle({ slots, reqs }) {
   ];
   const cols = [
     { k: 'use',  l: '✓ In Use',      bg: '#071507', c: 'var(--green)' },
-    { k: 'ch',   l: '⛵ Charter',    bg: '#051520', c: 'var(--blue)' },
+    { k: 'ch',   l: 'Charter',       bg: '#051520', c: 'var(--blue)' },
     { k: 'sw',   l: '⇄ Swapped',    bg: '#120A30', c: 'var(--purple)' },
-    { k: 'pu',   l: '💰 Purchased',  bg: '#1C1505', c: 'var(--gold)' },
-    { k: 'sold', l: '💸 Sold',       bg: '#200A0A', c: 'var(--red)' },
+    { k: 'pu',   l: 'Purchased',     bg: '#1C1505', c: 'var(--gold)' },
+    { k: 'sold', l: 'Sold',         bg: '#200A0A', c: 'var(--red)' },
     { k: 'op',   l: '○ Open',        bg: 'rgba(249,246,240,.04)', c: 'rgba(249,246,240,.35)' },
     { k: 'tot',  l: 'Σ Total',       bg: 'rgba(249,246,240,.07)', c: 'var(--cream)' },
     { k: 'rev',  l: 'Charter Revenue', bg: '#051520', c: 'var(--blue)', money: true },
@@ -626,8 +824,8 @@ function Tabelle({ slots, reqs }) {
 
   return (
     <div style={{ background: 'var(--navy-mid)', borderRadius: 12, padding: '16px 18px', border: '1px solid rgba(184,147,42,.2)', marginBottom: 20 }}>
-      <div style={{ fontWeight: 800, fontSize: 14, color: 'var(--gold)', marginBottom: 12, paddingBottom: 10, borderBottom: '1px solid rgba(184,147,42,.2)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        📊 My Week Overview
+      <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--gold)', marginBottom: 12, paddingBottom: 10, borderBottom: '1px solid rgba(184,147,42,.2)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        My Week Overview
         <span style={{ fontSize: 13, color: 'rgba(249,246,240,.3)', fontWeight: 400 }}>{O[ME].name} · 36 weeks total</span>
       </div>
       <div className="stats-scroll">
@@ -671,8 +869,8 @@ function Inbox({ reqs, slots, onAccept, onDecline }) {
   const fw = allWeeks(slots);
   return (
     <div style={{ background: 'rgba(184,147,42,.07)', border: '2px solid var(--gold)', borderRadius: 12, padding: '16px 18px', marginBottom: 20 }}>
-      <div style={{ fontWeight: 800, color: 'var(--gold)', fontSize: 14, marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
-        ⏳ Pending Requests ({pend.length})
+      <div style={{ fontWeight: 700, color: 'var(--gold)', fontSize: 14, marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
+        Pending Requests ({pend.length})
         <span style={{ fontSize: 13, color: 'rgba(184,147,42,.55)', fontWeight: 400, marginLeft: 'auto' }}>{O[ME].name} responds</span>
       </div>
       {pend.map(req => {
@@ -685,8 +883,8 @@ function Inbox({ reqs, slots, onAccept, onDecline }) {
           <div key={req.id} style={{ background: 'var(--navy)', border: '1px solid rgba(184,147,42,.25)', borderRadius: 10, padding: '12px 14px', marginBottom: 10 }}>
             <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--cream)', marginBottom: 10 }}>
               {req.type === 'swap' && thW  && `⇄ Swap request from ${fromO.name}`}
-              {req.type === 'buy'  && tgW  && `💰 Purchase request from ${fromO.name} for your week`}
-              {req.type === 'sell' && myW  && `💸 Sale offer from ${fromO.name}`}
+              {req.type === 'buy'  && tgW  && `Purchase request from ${fromO.name} for your week`}
+              {req.type === 'sell' && myW  && `Sale offer from ${fromO.name}`}
             </div>
 
             {req.type === 'swap' && myW && thW && (
@@ -714,7 +912,7 @@ function Inbox({ reqs, slots, onAccept, onDecline }) {
                 </div>
                 <div style={{ background: '#051507', border: '1px solid var(--green)', borderRadius: 8, padding: '8px 10px' }}>
                   <div style={{ fontSize: 12, color: 'var(--green)', fontWeight: 700 }}>YOU RECEIVE</div>
-                  <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--green)' }}>{eur(WP)}</div>
+                  <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--green)' }}>{eur(WP)}</div>
                 </div>
               </div>
             )}
@@ -728,7 +926,7 @@ function Inbox({ reqs, slots, onAccept, onDecline }) {
                 </div>
                 <div style={{ background: '#051507', border: '1px solid var(--green)', borderRadius: 8, padding: '8px 10px' }}>
                   <div style={{ fontSize: 12, color: 'var(--green)', fontWeight: 700 }}>YOU PAY</div>
-                  <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--green)' }}>{eur(WP)}</div>
+                  <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--green)' }}>{eur(WP)}</div>
                 </div>
               </div>
             )}
@@ -737,7 +935,7 @@ function Inbox({ reqs, slots, onAccept, onDecline }) {
               <button onClick={() => onAccept(req)} style={{ padding: '8px 18px', borderRadius: 7, border: 'none', background: 'var(--green)', color: 'var(--navy)', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>
                 ✓ Accept
               </button>
-              <button onClick={() => onDecline(req)} style={{ padding: '8px 18px', borderRadius: 7, border: '1px solid rgba(248,113,113,.5)', background: 'transparent', color: 'var(--red)', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>
+              <button onClick={() => onDecline(req)} style={{ padding: '8px 18px', borderRadius: 7, border: '1px solid rgba(196,136,136,.5)', background: 'transparent', color: 'var(--red)', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>
                 ✕ Decline
               </button>
             </div>
@@ -755,8 +953,8 @@ function TxLog({ reqs, slots }) {
   const fw = allWeeks(slots);
   return (
     <div style={{ background: 'var(--navy-mid)', borderRadius: 10, padding: '12px 16px', border: '1px solid rgba(249,246,240,.07)', marginBottom: 20 }}>
-      <div style={{ fontWeight: 800, fontSize: 13, color: 'var(--cream)', marginBottom: 8, paddingBottom: 8, borderBottom: '1px solid rgba(249,246,240,.07)' }}>
-        📋 Transaction History
+      <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--cream)', marginBottom: 8, paddingBottom: 8, borderBottom: '1px solid rgba(249,246,240,.07)' }}>
+        Transaction History
       </div>
       {done2.map((r, i) => {
         const ok   = r.status === 'accepted';
@@ -768,10 +966,10 @@ function TxLog({ reqs, slots }) {
         let txt = '';
         if (r.type === 'swap' && myW && thW) txt = `${myW.slotShort} W${myW.wn} ⇄ ${O[r.toOwner]?.name || r.toOwner} ${thW.slotShort} W${thW.wn}`;
         if (r.type === 'buy'  && tgW)        txt = `${tgW.slotShort} W${tgW.wn} · ${eur(WP)}`;
-        if (r.type === 'sell' && myW && toO) txt = `${myW.slotShort} W${myW.wn} an ${toO.name} · ${eur(WP)}`;
+        if (r.type === 'sell' && myW && toO) txt = `${myW.slotShort} W${myW.wn} to ${toO.name} · ${eur(WP)}`;
         return (
           <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0', borderBottom: '1px solid rgba(249,246,240,.05)' }}>
-            <Pill bg={ok ? '#071507' : '#200A0A'} color={ok ? 'var(--green)' : 'var(--red)'}>
+            <Pill bg={ok ? '#071A12' : '#1A0C0C'} color={ok ? 'var(--green)' : 'var(--red)'}>
               {ok ? `✓ ${tl}` : `✕ ${tl} declined`}
             </Pill>
             <span style={{ fontSize: 12, color: 'rgba(249,246,240,.5)' }}>{txt}</span>
@@ -783,67 +981,234 @@ function TxLog({ reqs, slots }) {
   );
 }
 
-// ── OVERVIEW ──────────────────────────────────────────────────────────────────
-function Overview({ slots }) {
+// ── SLOT CALENDAR MODAL ──────────────────────────────────────────────────────
+function SlotCalModal({ slot, onClose }) {
+  const ow = O[slot.origOwner];
+  const MN_FULL = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const DOW = ['M','T','W','T','F','S','S'];
+
+  const startD = new Date(slot.start);
+  const endD   = new Date(slot.end);
+  const months = [];
+  let cur = new Date(startD.getFullYear(), startD.getMonth(), 1);
+  const last = new Date(endD.getFullYear(), endD.getMonth(), 1);
+  while (cur <= last) { months.push(new Date(cur)); cur = new Date(cur.getFullYear(), cur.getMonth() + 1, 1); }
+
+  const getDayWeek = (date) => {
+    if (!date) return null;
+    const iso = date.toISOString().slice(0, 10);
+    return slot.weeks.find(w => iso >= w.start && iso <= w.end) || null;
+  };
+
+  const MonthGrid = ({ month }) => {
+    const y = month.getFullYear(), m = month.getMonth();
+    const firstDow = (new Date(y, m, 1).getDay() + 6) % 7;
+    const daysInMonth = new Date(y, m + 1, 0).getDate();
+    const cells = [];
+    for (let i = 0; i < firstDow; i++) cells.push(null);
+    for (let d = 1; d <= daysInMonth; d++) cells.push(new Date(y, m, d));
+    return (
+      <div style={{ minWidth: 196, flex: '1 1 196px' }}>
+        <div style={{ fontWeight: 600, fontSize: 13, color: 'var(--gold)', marginBottom: 8, textAlign: 'center' }}>
+          {MN_FULL[m]} {y}
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 2 }}>
+          {DOW.map((d, i) => (
+            <div key={i} style={{ textAlign: 'center', fontSize: 10, color: 'rgba(249,246,240,.25)', fontWeight: 600, paddingBottom: 4 }}>{d}</div>
+          ))}
+          {cells.map((date, i) => {
+            const wk = date ? getDayWeek(date) : null;
+            const bg = wk
+              ? (wk.status === 'use' ? ow.c : wk.status === 'charter' ? ow.c + '66' : ow.c + '30')
+              : 'transparent';
+            const tc = wk
+              ? (wk.status === 'use' ? 'var(--navy)' : ow.c)
+              : 'rgba(249,246,240,.2)';
+            return (
+              <div key={i} style={{
+                textAlign: 'center', fontSize: 11, padding: '5px 2px',
+                background: bg, borderRadius: 3, color: tc,
+                fontWeight: wk ? 600 : 400,
+              }}>
+                {date ? date.getDate() : ''}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  const use = slot.weeks.filter(w => w.status === 'use').length;
+  const ch  = slot.weeks.filter(w => w.status === 'charter').length;
+  const op  = slot.weeks.filter(w => !w.status).length;
+
+  return (
+    <div onClick={onClose} style={{
+      position: 'fixed', inset: 0, background: 'rgba(0,0,0,.72)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      zIndex: 200, padding: 24,
+    }}>
+      <div onClick={e => e.stopPropagation()} style={{
+        background: 'var(--navy-mid)', borderRadius: 14,
+        border: `2px solid ${ow.c}44`,
+        boxShadow: '0 16px 64px rgba(0,0,0,.7)',
+        maxWidth: 680, width: '100%', maxHeight: '90vh', overflowY: 'auto',
+      }}>
+        <div style={{ height: 5, background: ow.c, borderRadius: '12px 12px 0 0' }} />
+        <div style={{ padding: '14px 20px', borderBottom: `1px solid ${ow.c}22`, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
+          <div>
+            <div style={{ color: ow.c, fontWeight: 700, fontSize: 16 }}>
+              {slot.prem ? '★ ' : ''}{slot.label}
+            </div>
+            <div style={{ color: 'rgba(249,246,240,.4)', fontSize: 12, marginTop: 2 }}>
+              {slot.qual} · {slot.type === 'EU' ? 'Mediterranean' : 'Caribbean'} · {ow.name}
+            </div>
+            <div style={{ display: 'flex', gap: 10, marginTop: 6 }}>
+              {use > 0 && <span style={{ fontSize: 12, color: 'var(--green)' }}>✓ {use}W In Use</span>}
+              {ch  > 0 && <span style={{ fontSize: 12, color: 'var(--blue)' }}>{ch}W Charter</span>}
+              {op  > 0 && <span style={{ fontSize: 12, color: 'rgba(249,246,240,.3)' }}>○ {op}W Open</span>}
+            </div>
+          </div>
+          <button onClick={onClose} style={{
+            background: 'transparent', border: '1px solid rgba(249,246,240,.15)',
+            borderRadius: 6, padding: '5px 10px', color: 'rgba(249,246,240,.4)',
+            fontSize: 13, cursor: 'pointer', flexShrink: 0,
+          }}>✕</button>
+        </div>
+        <div style={{ padding: '20px', display: 'flex', gap: 20, flexWrap: 'wrap', justifyContent: 'center' }}>
+          {months.map((month, i) => <MonthGrid key={i} month={month} />)}
+        </div>
+        <div style={{ padding: '0 20px 14px', display: 'flex', gap: 14, fontSize: 11, color: 'rgba(249,246,240,.25)', alignItems: 'center' }}>
+          <span>Week status:</span>
+          <span><span style={{ background: ow.c + '30', padding: '1px 6px', borderRadius: 2, color: ow.c }}>open</span></span>
+          <span><span style={{ background: ow.c + '66', padding: '1px 6px', borderRadius: 2, color: ow.c }}>charter</span></span>
+          <span><span style={{ background: ow.c, padding: '1px 6px', borderRadius: 2, color: 'var(--navy)' }}>in use</span></span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── OVERVIEW (Gantt Season Timeline) ─────────────────────────────────────────
+function Overview({ slots, onSlotCal }) {
+  const dayMs  = 86400000;
+  const MN_LOC = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+  const GanttSeason = ({ label, color, seasonSlots, seasonStart, seasonEnd }) => {
+    const seasonDays = Math.round((seasonEnd - seasonStart) / dayMs) + 1;
+
+    const mLabels = [];
+    let mDate = new Date(seasonStart.getFullYear(), seasonStart.getMonth(), 1);
+    while (mDate <= seasonEnd) {
+      const mStart = Math.max(mDate, seasonStart);
+      const mNext  = new Date(mDate.getFullYear(), mDate.getMonth() + 1, 1);
+      const mEnd   = mNext > seasonEnd ? new Date(seasonEnd.getTime() + dayMs) : mNext;
+      mLabels.push({
+        name:  MN_LOC[mDate.getMonth()],
+        left:  (mStart - seasonStart) / dayMs / seasonDays * 100,
+        width: (mEnd   - mStart)      / dayMs / seasonDays * 100,
+      });
+      mDate = mNext;
+    }
+
+    return (
+      <div style={{ marginBottom: 18 }}>
+        <div style={{ fontSize: 11, fontWeight: 600, color, marginBottom: 5, letterSpacing: 1 }}>{label}</div>
+        {/* Month axis */}
+        <div style={{ position: 'relative', height: 14, marginBottom: 2 }}>
+          {mLabels.map((ml, i) => (
+            <div key={i} style={{
+              position: 'absolute', left: `${ml.left}%`, width: `${ml.width}%`,
+              textAlign: 'center', fontSize: 9, color: 'rgba(249,246,240,.3)',
+              fontWeight: 600, textTransform: 'uppercase', letterSpacing: .3,
+              overflow: 'hidden', whiteSpace: 'nowrap',
+            }}>{ml.name}</div>
+          ))}
+        </div>
+        {/* Band row */}
+        <div style={{ position: 'relative', height: 38, background: 'rgba(249,246,240,.02)', borderRadius: 4, border: '1px solid rgba(249,246,240,.06)' }}>
+          {mLabels.slice(1).map((ml, i) => (
+            <div key={i} style={{
+              position: 'absolute', left: `${ml.left}%`, top: 0, height: '100%',
+              width: 1, background: 'rgba(249,246,240,.05)',
+            }} />
+          ))}
+          {seasonSlots.map(sl => {
+            const ow = O[sl.origOwner];
+            const dFromStart = Math.round((new Date(sl.start) - seasonStart) / dayMs);
+            const left  = dFromStart / seasonDays * 100;
+            const width = 21 / seasonDays * 100;
+            const use   = sl.weeks.filter(w => w.status === 'use').length;
+            const ch    = sl.weeks.filter(w => w.status === 'charter').length;
+            const alpha = use > 0 ? 'cc' : ch > 0 ? '77' : '33';
+            const hasMine = sl.weeks.some(w => w.owner === ME);
+            const textDark = use > 0;
+            return (
+              <div key={sl.id}
+                title={`${sl.label}: ${fmt(sl.start)} – ${fmt(sl.end)}`}
+                onClick={() => onSlotCal(sl)}
+                style={{
+                  position: 'absolute', top: 4, left: `${left}%`, width: `${width}%`,
+                  height: 30,
+                  background: `linear-gradient(135deg, ${ow.c}${alpha}, ${ow.c}22)`,
+                  border: `1px solid ${ow.c}55`,
+                  borderRadius: 3, cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', paddingLeft: 5, gap: 3,
+                  overflow: 'hidden',
+                  boxShadow: hasMine ? `inset 0 0 0 1px ${ow.c}99` : 'none',
+                }}>
+                <span style={{ fontSize: 10, color: textDark ? 'var(--navy)' : ow.c, fontWeight: 700, whiteSpace: 'nowrap' }}>
+                  {sl.prem ? '★ ' : ''}{sl.slabel}
+                </span>
+                <span style={{ fontSize: 9, color: textDark ? 'rgba(0,0,0,.45)' : ow.c + '88', whiteSpace: 'nowrap' }}>[{sl.origOwner}]</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  const Crossing = ({ label }) => (
+    <div style={{
+      margin: '16px 0', padding: '10px 18px',
+      background: 'rgba(184,147,42,.06)',
+      border: '1px solid rgba(184,147,42,.2)',
+      borderLeft: '3px solid rgba(184,147,42,.5)',
+      borderRadius: 6,
+      display: 'flex', alignItems: 'center', gap: 12,
+    }}>
+      <div style={{ flex: 1, height: 1, background: 'rgba(184,147,42,.2)' }} />
+      <span style={{ fontSize: 12, color: 'rgba(184,147,42,.75)', fontWeight: 600, letterSpacing: 1, whiteSpace: 'nowrap' }}>
+        {label}
+      </span>
+      <div style={{ flex: 1, height: 1, background: 'rgba(184,147,42,.2)' }} />
+    </div>
+  );
+
   return (
     <div>
-      {[1,2,3].map(y => {
-        const ey = YEAR0 + y - 1;
+      {[1,2,3].map(yr => {
+        const ey       = YEAR0 + yr - 1;
+        const euSlots  = slots.filter(s => s.yr === yr && s.type === 'EU');
+        const karSlots = slots.filter(s => s.yr === yr && s.type === 'KAR');
+        const euStart  = new Date(ey,     4,  15);
+        const euEnd    = new Date(ey,     8,  17);
+        const karStart = new Date(ey,     10, 15);
+        const karEnd   = new Date(ey + 1, 2,  20);
         return (
-          <div key={y} style={{ background: 'var(--navy-mid)', borderRadius: 12, padding: '16px 18px', border: '1px solid rgba(184,147,42,.15)', marginBottom: 20 }}>
-            <div style={{ fontWeight: 800, fontSize: 15, color: 'var(--gold)', marginBottom: 14, paddingBottom: 10, borderBottom: '1px solid rgba(184,147,42,.15)', display: 'flex', justifyContent: 'space-between' }}>
-              📅 Year {y}
+          <div key={yr} style={{ background: 'var(--navy-mid)', borderRadius: 12, padding: '16px 18px', border: '1px solid rgba(184,147,42,.15)', marginBottom: 20 }}>
+            <div style={{ fontWeight: 700, fontSize: 15, color: 'var(--gold)', marginBottom: 16, paddingBottom: 10, borderBottom: '1px solid rgba(184,147,42,.15)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              Year {yr}
               <span style={{ fontSize: 12, color: 'rgba(249,246,240,.3)', fontWeight: 400 }}>Mediterranean {ey} · Caribbean {ey}–{ey+1}</span>
             </div>
-            <div className="grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 14 }}>
-              {['A','B','C'].map(ow => {
-                const o    = O[ow];
-                const myW  = allWeeks(slots).filter(w => w.owner === ow && w.yr === y);
-                const use  = myW.filter(w => w.status === 'use').length;
-                const ch   = myW.filter(w => w.status === 'charter').length;
-                const op   = myW.filter(w => !w.status).length;
-                const mySl = slots.filter(s => s.yr === y && s.origOwner === ow);
-                return (
-                  <div key={ow} style={{ border: `1.5px solid ${o.c}33`, borderRadius: 10, overflow: 'hidden' }}>
-                    <div style={{ background: o.c + '1A', borderBottom: `1px solid ${o.c}44`, padding: '9px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ color: o.c, fontWeight: 800, fontSize: 14 }}>{o.name}</span>
-                      <span style={{ background: o.c + '33', color: o.c, borderRadius: 20, padding: '1px 9px', fontSize: 13, fontWeight: 700 }}>{myW.length}W</span>
-                    </div>
-                    <div style={{ padding: '10px 12px' }}>
-                      {['EU','KAR'].map(type => (
-                        <div key={type} style={{ marginBottom: 8 }}>
-                          <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 4, color: type === 'EU' ? 'var(--green)' : 'var(--blue)', display: 'flex', alignItems: 'center', gap: 3 }}>
-                            <div style={{ width: 6, height: 6, borderRadius: '50%', background: type === 'EU' ? 'var(--green)' : 'var(--blue)' }} />
-                            {type === 'EU' ? 'Mediterranean' : 'Caribbean'}
-                          </div>
-                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
-                            {mySl.filter(s => s.type === type).map(sl => (
-                              <div key={sl.id} style={{ background: o.bg, borderRadius: 5, padding: '3px 7px', border: `1px solid ${o.c}22` }}>
-                                <div style={{ fontWeight: 700, fontSize: 13, color: o.c }}>{sl.prem ? '★ ' : ''}{sl.slabel}</div>
-                                <div style={{ display: 'flex', gap: 2, marginTop: 1 }}>
-                                  {sl.weeks.map(w => (
-                                    <div key={w.id} title={`W${w.wn}: ${w.status || 'open'}`}
-                                      style={{ width: 7, height: 7, borderRadius: 1, background: w.status === 'use' ? 'var(--green)' : w.status === 'charter' ? 'var(--blue)' : 'rgba(249,246,240,.12)' }} />
-                                  ))}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-                      <div style={{ background: 'rgba(249,246,240,.03)', borderRadius: 7, padding: '6px 8px', display: 'flex', gap: 8, marginTop: 4, flexWrap: 'wrap' }}>
-                        {[['✓', use, 'var(--green)'], ['⛵', ch, 'var(--blue)'], ['○', op, 'rgba(249,246,240,.3)']].map(([l, v, c]) => (
-                          <div key={l} style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-                            <span style={{ fontSize: 12, color: 'rgba(249,246,240,.35)' }}>{l}</span>
-                            <span style={{ fontSize: 12, fontWeight: 700, color: c }}>{v}W</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            <GanttSeason label={`MEDITERRANEAN ${ey}`} color="var(--green)"
+              seasonSlots={euSlots} seasonStart={euStart} seasonEnd={euEnd} />
+            <Crossing label={`Atlantic Crossing · Oct–Nov ${ey}`} />
+            <GanttSeason label={`CARIBBEAN ${ey}–${ey+1}`} color="var(--blue)"
+              seasonSlots={karSlots} seasonStart={karStart} seasonEnd={karEnd} />
+            <Crossing label={`Atlantic Crossing · Apr–May ${ey+1}`} />
           </div>
         );
       })}
@@ -865,10 +1230,10 @@ function Header({ pendingCount, onReset }) {
       }}>
         <div style={{ maxWidth: 1060, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
           <div>
-            <div style={{ color: 'var(--gold)', fontWeight: 800, fontSize: 13, letterSpacing: 3, marginBottom: 2, opacity: .7 }}>
+            <div style={{ color: 'var(--gold)', fontWeight: 700, fontSize: 13, letterSpacing: 3, marginBottom: 2, opacity: .7 }}>
               PRIVATE YACHT CLUB · USAGE PLANNER
             </div>
-            <h1 style={{ color: 'var(--cream)', fontSize: 17, fontWeight: 800, margin: 0 }}>Explorer Yacht · 50m</h1>
+            <h1 style={{ color: 'var(--cream)', fontSize: 17, fontWeight: 700, margin: 0 }}>Explorer Yacht · 50m</h1>
             <div style={{ color: 'rgba(249,246,240,.3)', fontSize: 12, marginTop: 1 }}>Montenegro · Mediterranean & Caribbean</div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
@@ -890,7 +1255,7 @@ function Header({ pendingCount, onReset }) {
                     border: `2px solid ${active ? ow.c : 'rgba(249,246,240,.1)'}`,
                     background: active ? ow.c + '25' : 'transparent',
                     color: active ? ow.c : 'rgba(249,246,240,.35)',
-                    fontWeight: 800, fontSize: 13,
+                    fontWeight: 700, fontSize: 13,
                     boxShadow: active ? `0 0 12px ${ow.c}44` : 'none',
                   }}>
                     {o}
@@ -928,7 +1293,7 @@ function Header({ pendingCount, onReset }) {
           }}>{ME}</div>
           {/* Name + status */}
           <div style={{ flex: 1 }}>
-            <div style={{ color: me.c, fontWeight: 800, fontSize: 15, lineHeight: 1.2 }}>
+            <div style={{ color: me.c, fontWeight: 700, fontSize: 15, lineHeight: 1.2 }}>
               {me.name}
             </div>
             <div style={{ color: 'rgba(249,246,240,.45)', fontSize: 13, marginTop: 2 }}>
@@ -943,7 +1308,6 @@ function Header({ pendingCount, onReset }) {
               color: me.c, fontWeight: 700, fontSize: 12,
               display: 'flex', alignItems: 'center', gap: 6,
             }}>
-              <span style={{ fontSize: 16 }}>⏳</span>
               {pendingCount} pending request{pendingCount > 1 ? 's' : ''} waiting
             </div>
           )}
@@ -963,11 +1327,12 @@ function App() {
   const [swapM,    setSwapM]    = useState(null);
   const [buyM,     setBuyM]     = useState(null);
   const [sellM,    setSellM]    = useState(null);
+  const [slotCalM, setSlotCalM] = useState(null);
   const [toast,    setToast]    = useState(null);
   const [showAll,  setShowAll]  = useState(false);
   const pollRef = useRef(null);
 
-  const modalOpen = !!(swapM || buyM || sellM);
+  const modalOpen = !!(swapM || buyM || sellM || slotCalM);
 
   const fetchState = useCallback(async () => {
     try {
@@ -1012,7 +1377,7 @@ function App() {
     const d = await r.json();
     if (!d.ok) { notify('Error: ' + d.error, 'var(--red)'); return; }
     await fetchState();
-    notify(action === 'use' ? '✓ Marked as personal use' : '⛵ Released for charter');
+    notify(action === 'use' ? '✓ Marked as personal use' : 'Released for charter');
   };
 
   const sendSwap = async (myW, thW) => {
@@ -1036,7 +1401,7 @@ function App() {
     const d = await r.json();
     if (!d.ok) { notify('Error: ' + d.error, 'var(--red)'); return; }
     await fetchState();
-    notify(`💰 Purchase request sent to ${O[tgW.owner].name}`);
+    notify(`Purchase request sent to ${O[tgW.owner].name}`);
   };
 
   const sendSell = async (myW) => {
@@ -1048,7 +1413,7 @@ function App() {
     const d = await r.json();
     if (!d.ok) { notify('Error: ' + d.error, 'var(--red)'); return; }
     await fetchState();
-    notify(`💸 Sale offer sent to all owners`);
+    notify(`Sale offer sent to all owners`);
   };
 
   const acceptReq = async (req) => {
@@ -1095,12 +1460,13 @@ function App() {
       )}
 
       {/* Modals */}
-      {swapM && <SwapModal myWeek={swapM.week} slots={slots} reqs={requests}
+      {swapM    && <SwapModal myWeek={swapM.week} slots={slots} reqs={requests}
         onSend={sendSwap} onClose={() => setSwapM(null)} />}
-      {buyM  && <BuyModal  week={buyM.week}
+      {buyM     && <BuyModal  week={buyM.week}
         onSend={sendBuy}  onClose={() => setBuyM(null)} />}
-      {sellM && <SellModal week={sellM.week}
+      {sellM    && <SellModal week={sellM.week}
         onSend={sendSell} onClose={() => setSellM(null)} />}
+      {slotCalM && <SlotCalModal slot={slotCalM.slot} onClose={() => setSlotCalM(null)} />}
 
       {/* Header */}
       <Header pendingCount={pendingCount} onReset={async () => {
@@ -1122,13 +1488,13 @@ function App() {
           const cw = allWeeks(slots).filter(w => w.owner === ME && w.status === 'charter');
           if (!cw.length) return null;
           return (
-            <div style={{ background: 'var(--navy-mid)', borderRadius: 10, padding: '12px 16px', border: '1px solid rgba(122,184,212,.2)', marginBottom: 20 }}>
-              <div style={{ fontWeight: 800, fontSize: 13, marginBottom: 10, paddingBottom: 8, borderBottom: '1px solid rgba(122,184,212,.12)', color: 'var(--blue)' }}>
-                ⛵ Weeks released for charter ({cw.length}W)
+            <div style={{ background: 'var(--navy-mid)', borderRadius: 10, padding: '12px 16px', border: '1px solid rgba(106,160,186,.2)', marginBottom: 20 }}>
+              <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 10, paddingBottom: 8, borderBottom: '1px solid rgba(106,160,186,.12)', color: 'var(--blue)' }}>
+                Weeks released for charter ({cw.length}W)
               </div>
               <div className="charter-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 7, marginBottom: 10 }}>
                 {cw.map(w => (
-                  <div key={w.id} style={{ background: 'rgba(122,184,212,.06)', border: '1px solid rgba(122,184,212,.2)', borderRadius: 7, padding: '9px 10px' }}>
+                  <div key={w.id} style={{ background: 'rgba(106,160,186,.06)', border: '1px solid rgba(106,160,186,.2)', borderRadius: 7, padding: '9px 10px' }}>
                     <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--blue)' }}>{w.slotShort} W{w.wn}</div>
                     <div style={{ fontSize: 12, color: 'rgba(249,246,240,.35)' }}>{w.type === 'EU' ? 'Mediterranean' : 'Caribbean'}</div>
                     <div style={{ fontSize: 13, color: 'rgba(249,246,240,.55)', marginTop: 2 }}>{fmt(w.start)}</div>
@@ -1136,12 +1502,12 @@ function App() {
                   </div>
                 ))}
               </div>
-              <div style={{ background: 'rgba(122,184,212,.06)', border: '1px solid rgba(122,184,212,.15)', borderRadius: 7, padding: '9px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ background: 'rgba(106,160,186,.06)', border: '1px solid rgba(106,160,186,.15)', borderRadius: 7, padding: '9px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                   <div style={{ fontWeight: 700, color: 'var(--blue)', fontSize: 12 }}>Net revenue (65% after broker + management)</div>
-                  <div style={{ fontSize: 12, color: 'rgba(122,184,212,.5)' }}>{cw.length}W × {eur(CR)} × 65%</div>
+                  <div style={{ fontSize: 12, color: 'rgba(106,160,186,.5)' }}>{cw.length}W × {eur(CR)} × 65%</div>
                 </div>
-                <div style={{ fontWeight: 800, color: 'var(--blue)', fontSize: 18 }}>{eur(cw.length * CR * .65)}</div>
+                <div style={{ fontWeight: 700, color: 'var(--blue)', fontSize: 18 }}>{eur(cw.length * CR * .65)}</div>
               </div>
             </div>
           );
@@ -1150,7 +1516,7 @@ function App() {
         {/* Tab bar + year filter */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: 10 }}>
           <div style={{ display: 'flex', gap: 6 }}>
-            {[['cal','📅 Calendar'],['over','👥 Year Overview']].map(([k, l]) => (
+            {[['cal','Calendar'],['over','Overview Calendar']].map(([k, l]) => (
               <button key={k} onClick={() => setTab(k)} style={{
                 padding: '8px 16px', borderRadius: 20,
                 border: `2px solid ${tab === k ? 'var(--gold)' : 'rgba(249,246,240,.12)'}`,
@@ -1198,7 +1564,7 @@ function App() {
         )}
 
         {/* Overview tab */}
-        {tab === 'over' && <Overview slots={slots} />}
+        {tab === 'over' && <Overview slots={slots} onSlotCal={sl => setSlotCalM({ slot: sl })} />}
 
         {/* Calendar tab */}
         {tab === 'cal' && years.map(y => {
@@ -1219,18 +1585,18 @@ function App() {
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center'
               }}>
                 <div>
-                  <div style={{ color: 'var(--gold)', fontWeight: 800, fontSize: 16 }}>Year {y}</div>
+                  <div style={{ color: 'var(--gold)', fontWeight: 700, fontSize: 16 }}>Year {y}</div>
                   <div style={{ color: 'rgba(249,246,240,.35)', fontSize: 12 }}>Mediterranean {ey} · Caribbean {ey}–{ey+1}</div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
                   <div style={{ color: 'rgba(249,246,240,.35)', fontSize: 13 }}>Your Weeks</div>
-                  <div style={{ color: 'var(--gold)', fontWeight: 800, fontSize: 20 }}>{myCount}W</div>
+                  <div style={{ color: 'var(--gold)', fontWeight: 700, fontSize: 20 }}>{myCount}W</div>
                 </div>
               </div>
 
               {/* EU section */}
               <div style={{ marginBottom: 16 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 10, paddingBottom: 8, borderBottom: '1px solid rgba(134,239,172,.12)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 10, paddingBottom: 8, borderBottom: '1px solid rgba(122,184,154,.12)' }}>
                   <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--green)' }} />
                   <span style={{ fontWeight: 700, fontSize: 13, color: 'var(--green)' }}>Mediterranean · {ey}</span>
                   <span style={{ fontSize: 12, color: 'rgba(249,246,240,.25)', marginLeft: 'auto' }}>Tap slot → plan weeks</span>
@@ -1242,7 +1608,7 @@ function App() {
                       onToggle={() => setExp(p => p === s.id ? null : s.id)} />
                   ))}
                   {eu.find(s => expanded === s.id) && (
-                    <SlotPanel
+                    <SlotCalPanel
                       slot={eu.find(s => expanded === s.id)}
                       slots={slots} reqs={requests}
                       onWeekAction={handleWeek}
@@ -1253,7 +1619,7 @@ function App() {
 
               {/* KAR section */}
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 10, paddingBottom: 8, borderBottom: '1px solid rgba(122,184,212,.12)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 10, paddingBottom: 8, borderBottom: '1px solid rgba(106,160,186,.12)' }}>
                   <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--blue)' }} />
                   <span style={{ fontWeight: 700, fontSize: 13, color: 'var(--blue)' }}>Caribbean · {ey}–{ey+1}</span>
                   <span style={{ fontSize: 12, color: 'rgba(249,246,240,.25)', marginLeft: 'auto' }}>Tap slot → plan weeks</span>
@@ -1265,7 +1631,7 @@ function App() {
                       onToggle={() => setExp(p => p === s.id ? null : s.id)} />
                   ))}
                   {kar.find(s => expanded === s.id) && (
-                    <SlotPanel
+                    <SlotCalPanel
                       slot={kar.find(s => expanded === s.id)}
                       slots={slots} reqs={requests}
                       onWeekAction={handleWeek}
@@ -1278,24 +1644,34 @@ function App() {
         })}
 
         {/* Legend */}
-        <div style={{ background: 'var(--navy-mid)', borderRadius: 9, padding: '10px 16px', display: 'flex', gap: 14, flexWrap: 'wrap', border: '1px solid rgba(249,246,240,.05)', marginTop: 8 }}>
-          <span style={{ fontSize: 13, color: 'rgba(249,246,240,.25)', fontWeight: 700 }}>LEGEND:</span>
-          {[
-            [O.A.c, '● Owner A'],
-            [O.B.c, '● Owner B'],
-            [O.C.c, '● Owner C'],
-            ['var(--green)',  '✓ In use'],
-            ['var(--blue)',   '⛵ Charter'],
-            ['var(--purple)', '⇄ Swapped'],
-            ['var(--gold)',   '💰 Purchased'],
-            ['var(--red)',    '💸 Sold'],
-            ['var(--gold)',   '⏳ Request'],
-          ].map(([c, l]) => (
-            <div key={l} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-              <div style={{ width: 8, height: 8, borderRadius: '50%', background: c }} />
-              <span style={{ fontSize: 13, color: 'rgba(249,246,240,.4)' }}>{l}</span>
-            </div>
-          ))}
+        <div style={{ background: 'var(--navy-mid)', borderRadius: 9, padding: '10px 16px', display: 'flex', gap: 20, flexWrap: 'wrap', border: '1px solid rgba(249,246,240,.05)', marginTop: 8 }}>
+          <span style={{ fontSize: 12, color: 'rgba(249,246,240,.2)', fontWeight: 600, alignSelf: 'center' }}>LEGEND</span>
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+            {[['A', O.A.c], ['B', O.B.c], ['C', O.C.c]].map(([l, c]) => (
+              <div key={l} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <div style={{ width: 8, height: 8, borderRadius: 2, background: c }} />
+                <span style={{ fontSize: 12, color: 'rgba(249,246,240,.4)' }}>Owner {l}</span>
+              </div>
+            ))}
+          </div>
+          <div style={{ width: 1, background: 'rgba(249,246,240,.08)', alignSelf: 'stretch' }} />
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+            {[['var(--green)','✓ In Use'],['var(--blue)','Charter'],['rgba(249,246,240,.2)','○ Open']].map(([c,l]) => (
+              <div key={l} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <div style={{ width: 8, height: 8, borderRadius: 2, background: c }} />
+                <span style={{ fontSize: 12, color: 'rgba(249,246,240,.4)' }}>{l}</span>
+              </div>
+            ))}
+          </div>
+          <div style={{ width: 1, background: 'rgba(249,246,240,.08)', alignSelf: 'stretch' }} />
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+            {[['var(--gold)','Pending'],['var(--green)','✓ Accepted'],['var(--red)','✕ Declined']].map(([c,l]) => (
+              <div key={l} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <div style={{ width: 8, height: 8, borderRadius: 2, background: c }} />
+                <span style={{ fontSize: 12, color: 'rgba(249,246,240,.4)' }}>{l}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
