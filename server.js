@@ -10,11 +10,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // ── DATA GENERATION ────────────────────────────────────────────────────────────
 const YEAR0 = 2026;
-const WP = 250000;
+const WP = 245000;
 const CR = 325000;
 
-const EQ = {1:"Frühsaison",2:"Frühsommer",3:"Hauptsaison",4:"★ HOCHSOMMER",5:"★ HOCHSOMMER",6:"Nachsaison"};
-const KQ = {1:"Vorsaison",2:"★ WEIHNACHTEN",3:"★ NEUJAHR",4:"Hochsaison",5:"Nachsaison",6:"Spätsaison"};
+const EQ = {1:"Early Season",2:"Early Summer",3:"High Season",4:"★ HIGH SUMMER",5:"★ HIGH SUMMER",6:"Late Season"};
+const KQ = {1:"Pre-Season",2:"★ CHRISTMAS",3:"★ NEW YEAR",4:"Peak Season",5:"Late Season",6:"Off-Season"};
 const EP = new Set([4,5]);
 const KP = new Set([2,3]);
 
