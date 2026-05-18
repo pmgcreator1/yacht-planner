@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Apply for Membership – Private Yacht Club</title>
+  <title>Request More Information – Private Yacht Club</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -33,6 +33,10 @@
       border-bottom: 1px solid rgba(201, 168, 76, 0.25);
       padding: 64px 24px 56px;
       text-align: center;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
     .hero-eyebrow {
       font-family: 'Arial', sans-serif;
@@ -290,7 +294,7 @@
       An exclusive fractional ownership community for those who demand the extraordinary.
       Private access. Zero compromise.
     </p>
-    <button class="hero-cta" onclick="startForm()">Apply for Membership</button>
+    <button class="hero-cta" onclick="startForm()">Request More Information</button>
   </div>
 
   <!-- FORM SECTION -->
@@ -461,7 +465,9 @@
       const err = document.getElementById('err' + n);
       if (n === 1) {
         const emailVal = g('email');
+        const phoneVal = g('phone');
         const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal);
+        const phoneOk = /^[+]?[\d\s\-(). ]{7,20}$/.test(phoneVal);
         const allFilled = v('firstName') && v('lastName') && v('email') && v('phone');
         if (!allFilled) {
           err.textContent = 'Please fill in all required fields.';
@@ -470,6 +476,11 @@
         }
         if (!emailOk) {
           err.textContent = 'Please enter a valid email address.';
+          err.style.display = 'block';
+          return false;
+        }
+        if (!phoneOk) {
+          err.textContent = 'Please enter a valid phone number (e.g. +49 170 123 4567).';
           err.style.display = 'block';
           return false;
         }
