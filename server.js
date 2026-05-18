@@ -350,6 +350,7 @@ app.use((err, req, res, next) => {
 
 // Local dev: start server directly. Vercel imports this file as a module.
 if (require.main === module) {
-  app.listen(3000, () => console.log('Yacht Planner running on http://localhost:3000'));
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => console.log(`Yacht Planner running on http://localhost:${PORT}`));
 }
 module.exports = app;
