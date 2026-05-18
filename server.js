@@ -78,6 +78,7 @@ function buildInitialState() {
     meta: { year0: YEAR0, weekPrice: WP, charterRate: CR },
     weeks,
     requests: DEMO_REQUESTS,
+    leads: [],
   };
 }
 
